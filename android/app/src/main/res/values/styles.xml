@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <item name="colorPrimary">#FFA726</item>  <!-- 오렌지 -->
+        <item name="colorPrimaryVariant">#FB8C00</item>  <!-- 더 진한 오렌지 -->
+        <item name="colorOnPrimary">#FFFFFF</item>  <!-- 흰색 -->
+    </style>
+
+    <style name="BottomNavTextActive" parent="@android:style/TextAppearance.Material">
+        <item name="android:textSize">19sp</item>  <!-- 활성화된 아이템 글자 크기 -->
+        <item name="android:lineSpacingExtra">10sp</item>
+    </style>
+
+    <style name="BottomNavTextInactive" parent="@android:style/TextAppearance.Material">
+        <item name="android:textSize">16sp</item>  <!-- 비활성화된 아이템 글자 크기 -->
+        <item name="android:lineSpacingExtra">10sp</item>
+    </style>
+
+    <style name="TitleTextStyle">
+        <item name="android:textSize">30sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#000000</item> <!-- 검은색 -->
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+</resources>

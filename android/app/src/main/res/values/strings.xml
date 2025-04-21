@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">PickNCook</string>
+    <string name="home">홈</string>
+    <string name="recipe">레시피</string>
+    <string name="myinfo">내정보</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

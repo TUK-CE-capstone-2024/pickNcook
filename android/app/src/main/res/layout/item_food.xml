@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/foodItemContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:layout_margin="6dp"
+    android:background="@drawable/item_background_selector"
+    android:padding="15dp">
+
+    <!-- 식재료 이미지 -->
+    <ImageView
+        android:id="@+id/foodImage"
+        android:layout_width="@dimen/food_image_size"
+        android:layout_height="@dimen/food_image_size"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_placeholder" />
+
+    <!-- 식재료 이름 -->
+    <TextView
+        android:id="@+id/foodName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="식재료"
+        android:textSize="@dimen/food_text_size"
+        android:textStyle="bold"
+        android:gravity="center"/>
+</LinearLayout>
+

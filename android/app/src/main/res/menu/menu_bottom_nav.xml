@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/navi_recipe"
+        android:enabled="true"
+        android:icon="@drawable/ic_recipe"
+        android:title="@string/recipe"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/navi_home"
+        android:enabled="true"
+        android:icon="@drawable/ic_home"
+        android:title="@string/home"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/navi_myinfo"
+        android:enabled="true"
+        android:icon="@drawable/ic_myinfo"
+        android:title="@string/myinfo"
+        app:showAsAction="always" />
+
+</menu>
