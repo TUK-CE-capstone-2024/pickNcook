@@ -1,9 +1,1 @@
-# Android Studio
-android/*.iml
-android/.idea/
-android/.gradle/
-android/local.properties
-
-# Build output
-android/build/
-android/app/build/
+/build
