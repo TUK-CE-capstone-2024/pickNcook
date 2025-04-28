@@ -33,7 +33,8 @@ data class BarcodeResponse(
 data class FridgeItem(
     val fridgeIngredientNo: Int,
     val userId: String,
-    val fridgeIngredient: String
+    val fridgeIngredient: String,
+    val imageResId: Int
 )
 
 // 장바구니 추가 요청 DTO

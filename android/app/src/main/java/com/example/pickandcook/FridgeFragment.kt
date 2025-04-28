@@ -102,12 +102,12 @@ class FridgeFragment : Fragment() {
         RetrofitClient.instance.getFridgeItems(userId).enqueue(object : Callback<List<FridgeItem>> {
             override fun onResponse(call: Call<List<FridgeItem>>, response: Response<List<FridgeItem>>) {
                 if (response.isSuccessful) {
-                    val fridgeItems = response.body() ?: emptyList()
+                    val fridgeItems = response.body()?: emptyList()
 
                     val foodItems = fridgeItems.map { fridgeItem ->
                         FoodItem(
                             name = fridgeItem.fridgeIngredient,
-                            imageResId = R.drawable.ic_placeholder
+                            imageResId = getImageResourceForIngredient(fridgeItem.fridgeIngredient)
                         )
                     }
 
@@ -137,9 +137,8 @@ class FridgeFragment : Fragment() {
 
     private fun calSpanCount(): Int {
         val screenWidth = resources.displayMetrics.widthPixels
-        val itemWidth = resources.getDimension(R.dimen.food_image_size) +
-                resources.getDimension(R.dimen.food_item_padding) * 2
-        return (screenWidth / itemWidth).toInt().coerceAtLeast(2)
+        val itemMinWidth = 150 * resources.displayMetrics.density // 아이템 하나 최소 150dp
+        return (screenWidth / itemMinWidth).toInt().coerceAtLeast(2)
     }
 
     private fun fetchFridgeItems() {
@@ -159,7 +158,7 @@ class FridgeFragment : Fragment() {
                     val foodItems = fridgeItems.map { fridgeItem ->
                         FoodItem(
                             name = fridgeItem.fridgeIngredient,
-                            imageResId = R.drawable.ic_placeholder
+                            imageResId = getImageResourceForIngredient(fridgeItem.fridgeIngredient)  // 수정
                         )
                     }
 
@@ -235,6 +234,23 @@ class FridgeFragment : Fragment() {
             }
         }
     }
+    private fun getImageResourceForIngredient(name: String): Int {
+        return when (name) {
+            "마늘" -> R.drawable.ic_garlic
+            "감자" -> R.drawable.ic_potato
+            "달걀" -> R.drawable.ic_egg
+            "양파" -> R.drawable.ic_onion
+            "닭고기" -> R.drawable.ic_chicken
+            "돼지고기" -> R.drawable.ic_pork
+            "소고기" -> R.drawable.ic_beef
+            "대파" -> R.drawable.ic_greenonion
+            "김치" -> R.drawable.ic_kimchi
+            "햄" -> R.drawable.ic_ham
+            "콩나물" -> R.drawable.ic_beansprouts
+            else -> R.drawable.ic_placeholder
+        }
+    }
+
 
 
     override fun onDestroyView() {

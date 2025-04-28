@@ -17,6 +17,7 @@ class FridgeAdapter(
     inner class ViewHolder(private val binding: ItemFoodBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: FridgeItem, isSelected: Boolean) {
             binding.foodName.text = item.fridgeIngredient
+            binding.foodImage.setImageResource(item.imageResId)
 
             // 선택 상태에 따라 배경 변경
             if (enableSelection) {

@@ -99,7 +99,7 @@ class FoodInfoFragment : Fragment() {
             messages = listOf(Message(role = "user", content = prompt))
         )
 
-        
+
 
         CoroutineScope(Dispatchers.IO).launch {
             try {

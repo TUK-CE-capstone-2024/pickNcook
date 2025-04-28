@@ -12,8 +12,11 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="0dp"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
             android:background="@color/main"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            android:paddingBottom="8dp"
             android:paddingStart="16dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -26,6 +29,7 @@
                 android:text="레시피 보관함"
                 android:textAppearance="@style/TitleTextStyle" />
         </androidx.appcompat.widget.Toolbar>
+
 
         <LinearLayout
             android:id="@+id/recipeContainer"

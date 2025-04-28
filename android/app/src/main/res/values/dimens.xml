@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="food_image_size">80dp</dimen>
-    <dimen name="food_item_padding">15dp</dimen>
-    <dimen name="food_text_size">22sp</dimen>
-    <dimen name="button_size">18sp</dimen>
+    <dimen name="food_image_size">100dp</dimen>
+    <dimen name="food_item_padding">20dp</dimen>
+    <dimen name="food_text_size">24sp</dimen>
+    <dimen name="button_size">20sp</dimen>
 </resources>

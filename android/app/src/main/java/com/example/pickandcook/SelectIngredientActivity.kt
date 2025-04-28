@@ -78,8 +78,12 @@ class SelectIngredientActivity : AppCompatActivity() {
         RetrofitClient.instance.getFridgeItems(userId).enqueue(object : Callback<List<FridgeItem>> {
             override fun onResponse(call: Call<List<FridgeItem>>, response: Response<List<FridgeItem>>) {
                 if (response.isSuccessful) {
-                    fridgeIngredients = response.body()?.map { it.fridgeIngredient } ?: emptyList()
-                    fridgeAdapter.updateItems(response.body() ?: emptyList())
+                    val items = response.body()?.map { item ->
+                        item.copy(imageResId = getIngredientImage(item.fridgeIngredient))
+                    } ?: emptyList()
+
+                    fridgeIngredients = items.map { it.fridgeIngredient }
+                    fridgeAdapter.updateItems(items)
                     fetchCartItems()
                 } else {
                     Toast.makeText(this@SelectIngredientActivity, "냉장고 식재료 불러오기 실패", Toast.LENGTH_SHORT).show()
@@ -91,6 +95,24 @@ class SelectIngredientActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun getIngredientImage(ingredientName: String): Int {
+        return when (ingredientName) {
+            "마늘" -> R.drawable.ic_garlic
+            "감자" -> R.drawable.ic_potato
+            "달걀" -> R.drawable.ic_egg
+            "양파" -> R.drawable.ic_onion
+            "닭고기" -> R.drawable.ic_chicken
+            "돼지고기" -> R.drawable.ic_pork
+            "소고기" -> R.drawable.ic_beef
+            "대파" -> R.drawable.ic_greenonion
+            "김치" -> R.drawable.ic_kimchi
+            "햄" -> R.drawable.ic_ham
+            "콩나물" -> R.drawable.ic_beansprouts
+            else -> R.drawable.ic_placeholder
+        }
+    }
+
 
     private fun fetchCartItems() {
         val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)

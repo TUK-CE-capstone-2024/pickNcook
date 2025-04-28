@@ -52,7 +52,7 @@ class CategoryActivity : AppCompatActivity() {
             // 그룹명 (제목 텍스트)
             val titleView = TextView(this).apply {
                 text = groupName
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, 23f)
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f)
                 setTypeface(null, Typeface.BOLD)
                 setTextColor(Color.DKGRAY)
                 setPadding(0, 32, 0, 8)
@@ -71,10 +71,10 @@ class CategoryActivity : AppCompatActivity() {
                 rowList.forEach { category ->
                     val tv = TextView(this).apply {
                         text = category
-                        setPadding(24, 12, 24, 12)
+                        setPadding(24, 6, 24, 6)
                         background = ContextCompat.getDrawable(this@CategoryActivity, R.drawable.default_border)
                         setTextColor(Color.BLACK)
-                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 22f)
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
                         setTypeface(null, Typeface.NORMAL)
                         layoutParams = LinearLayout.LayoutParams(
                             ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -120,8 +120,8 @@ class CategoryActivity : AppCompatActivity() {
                         dpToPx(1000),
                         2
                     ).apply {
-                        topMargin = 28
-                        bottomMargin = 28
+                        topMargin = 20
+                        bottomMargin = 20
                     }
                     setBackgroundColor(Color.LTGRAY)
                 }
@@ -137,7 +137,7 @@ class CategoryActivity : AppCompatActivity() {
         // 카테고리 넘기는 작업 해야함 (어디로?)
         binding.btnNext.setOnClickListener {
             if (selectedMap.isEmpty()) {
-                AlertDialog.Builder(this)
+                AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
                     .setTitle("알림")
                     .setMessage("카테고리를 하나 이상 선택해주세요.")
                     .setPositiveButton("확인", null)
