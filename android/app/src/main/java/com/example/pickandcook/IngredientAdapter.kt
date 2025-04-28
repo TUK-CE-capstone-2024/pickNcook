@@ -7,7 +7,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.pickandcook.api.ShoppingListDetail
-
+// 쇼핑리스트때 필요할걸?
 class IngredientAdapter(
     private val ingredients: List<ShoppingListDetail>,
     private val onDeleteClick: (ShoppingListDetail) -> Unit

@@ -1,13 +1,27 @@
 package com.example.pickandcook
 
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.pickandcook.api.FridgeItem
+import com.example.pickandcook.api.RetrofitClient
 import com.example.pickandcook.databinding.FragmentFridgeBinding
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.util.concurrent.TimeUnit
 
 class FridgeFragment : Fragment() {
 
@@ -15,6 +29,7 @@ class FridgeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var adapter: FoodAdapter
+    private var serverIpAddress: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,43 +42,203 @@ class FridgeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        fetchServerIp()
+
         val spanCount = calSpanCount()
         binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), spanCount)
 
-        val foodList = listOf(
-            FoodItem("우유", R.drawable.ic_home),
-            FoodItem("계란", R.drawable.ic_myinfo),
-            FoodItem("치즈", R.drawable.ic_placeholder),
-            FoodItem("우유", R.drawable.ic_placeholder),
-            FoodItem("계란", R.drawable.ic_placeholder),
-            FoodItem("치즈", R.drawable.ic_placeholder)
-        )
+        loadFoodList()
 
-        adapter = FoodAdapter(foodList, onItemClick = { foodItem ->
-            val fragment = FoodInfoFragment.newInstance(foodItem.name, foodItem.imageResId)
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.mainFragmentContainer, fragment)
-                .addToBackStack(null)
-                .commit()
-        }, enableSelection = false) // 식재료 선택 불가능
-        binding.recyclerView.adapter = adapter
-
-        // 뒤로 가기 버튼 클릭 시 Fragment 스택에서 제거
         binding.toolbar.setNavigationOnClickListener {
             parentFragmentManager.popBackStack()
         }
+
+        binding.addButton.setOnClickListener {
+            runYoloAndRefresh()
+        }
+
+        fetchFridgeItems()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    private fun fetchServerIp() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .url("http://172.30.1.98:5000/get-server-ip")
+                    .build()
+
+                val response = client.newCall(request).execute()
+
+                if (response.isSuccessful) {
+                    val responseBody = response.body?.string()
+                    Log.d("FridgeFragment", "서버 IP 응답: $responseBody")
+
+                    val ipRegex = """"server_ip"\s*:\s*"([^"]+)""".toRegex()
+                    val matchResult = ipRegex.find(responseBody ?: "")
+
+                    matchResult?.groups?.get(1)?.value?.let { ip ->
+                        serverIpAddress = ip
+                        Log.d("FridgeFragment", "Flask 서버 IP 저장 완료: $serverIpAddress")
+                    }
+                } else {
+                    Log.e("FridgeFragment", "서버 IP 가져오기 실패: ${response.code}")
+                }
+            } catch (e: Exception) {
+                Log.e("FridgeFragment", "서버 IP 가져오는 중 오류", e)
+            }
+        }
     }
 
-    // 열 개수 계산
+    private fun loadFoodList() {
+        val sharedPref = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        val userId = sharedPref.getString("userId", null)
+
+        if (userId == null) {
+            Toast.makeText(requireContext(), "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        RetrofitClient.instance.getFridgeItems(userId).enqueue(object : Callback<List<FridgeItem>> {
+            override fun onResponse(call: Call<List<FridgeItem>>, response: Response<List<FridgeItem>>) {
+                if (response.isSuccessful) {
+                    val fridgeItems = response.body() ?: emptyList()
+
+                    val foodItems = fridgeItems.map { fridgeItem ->
+                        FoodItem(
+                            name = fridgeItem.fridgeIngredient,
+                            imageResId = R.drawable.ic_placeholder
+                        )
+                    }
+
+                    adapter = FoodAdapter(foodItems, onItemClick = { foodItem ->
+                        Log.d("FridgeFragment", "사용자가 클릭한 식재료 이름: ${foodItem.name}")
+
+                        val fragment = FoodInfoFragment.newInstance(foodItem.name, foodItem.imageResId)
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.mainFragmentContainer, fragment)
+                            .addToBackStack(null)
+                            .commit()
+                    }, enableSelection = false)
+
+                    binding.recyclerView.adapter = adapter
+
+                } else {
+                    Toast.makeText(requireContext(), "식재료 불러오기 실패", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<List<FridgeItem>>, t: Throwable) {
+                Toast.makeText(requireContext(), "네트워크 오류 발생: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+
     private fun calSpanCount(): Int {
         val screenWidth = resources.displayMetrics.widthPixels
         val itemWidth = resources.getDimension(R.dimen.food_image_size) +
                 resources.getDimension(R.dimen.food_item_padding) * 2
-        return (screenWidth / itemWidth).toInt().coerceAtLeast(2) // 최소 2열 유지
+        return (screenWidth / itemWidth).toInt().coerceAtLeast(2)
+    }
+
+    private fun fetchFridgeItems() {
+        val sharedPref = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        val userId = sharedPref.getString("userId", null)
+
+        if (userId == null) {
+            Toast.makeText(requireContext(), "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        RetrofitClient.instance.getFridgeItems(userId).enqueue(object : Callback<List<FridgeItem>> {
+            override fun onResponse(call: Call<List<FridgeItem>>, response: Response<List<FridgeItem>>) {
+                if (response.isSuccessful) {
+                    val fridgeItems = response.body() ?: emptyList()
+
+                    val foodItems = fridgeItems.map { fridgeItem ->
+                        FoodItem(
+                            name = fridgeItem.fridgeIngredient,
+                            imageResId = R.drawable.ic_placeholder
+                        )
+                    }
+
+                    adapter = FoodAdapter(foodItems, onItemClick = { foodItem ->
+                        Log.d("FridgeFragment", "사용자가 클릭한 식재료 이름: ${foodItem.name}")
+                        val fragment = FoodInfoFragment.newInstance(foodItem.name, foodItem.imageResId)
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.mainFragmentContainer, fragment)
+                            .addToBackStack(null)
+                            .commit()
+                    }, enableSelection = false)
+
+                    binding.recyclerView.adapter = adapter
+
+                } else {
+                    Toast.makeText(requireContext(), "식재료 불러오기 실패", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<List<FridgeItem>>, t: Throwable) {
+                Toast.makeText(requireContext(), "네트워크 오류 발생: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun runYoloAndRefresh() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val sharedPref = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+            val userId = sharedPref.getString("userId", null)
+
+            if (serverIpAddress == null || userId == null) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "서버 연결 또는 로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
+                }
+                return@launch
+            }
+
+            try {
+                val client = OkHttpClient.Builder()
+                    .connectTimeout(60, TimeUnit.SECONDS)
+                    .readTimeout(60, TimeUnit.SECONDS)
+                    .writeTimeout(60, TimeUnit.SECONDS)
+                    .build()
+
+                val requestBody = okhttp3.FormBody.Builder()
+                    .add("userId", userId)
+                    .build()
+
+                val request = Request.Builder()
+                    .url("$serverIpAddress/run-yolo")
+                    .post(requestBody)
+                    .build()
+
+                val response: okhttp3.Response = client.newCall(request).execute()
+
+                if (response.isSuccessful) {
+                    Log.d("FridgeFragment", "YOLO 감지 성공")
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(requireContext(), "객체 인식 완료!", Toast.LENGTH_SHORT).show()
+                        loadFoodList()
+                    }
+                } else {
+                    Log.e("FridgeFragment", "YOLO 감지 실패: ${response.code}")
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(requireContext(), "YOLO 감지 실패", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("FridgeFragment", "YOLO 감지 중 오류 발생", e)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "오류 발생: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

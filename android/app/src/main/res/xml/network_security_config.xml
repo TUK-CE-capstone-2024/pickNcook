@@ -2,6 +2,6 @@
 <!--http 통신 허용(버전이 https만 허용하기에 http도 가능하게 10.0.2.2는 내 애뮬레이터를 뜻함 ) -->
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">192.168.76.163</domain>  <!--10.0.2.2-->
+        <domain includeSubdomains="true">192.168.72.108</domain>  <!--10.0.2.2-->
     </domain-config>
 </network-security-config>

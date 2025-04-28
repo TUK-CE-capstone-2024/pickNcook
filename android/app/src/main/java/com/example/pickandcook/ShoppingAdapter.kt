@@ -4,42 +4,47 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.pickandcook.api.BarcodeResponse
 import com.example.pickandcook.databinding.ItemShoppingBinding
-
 
 class ShoppingAdapter(
     private val items: MutableList<ShoppingItem>,
-    private val onDelete: (ShoppingItem) -> Unit,
-    private val enableSelection: Boolean = false, // 선택 기능 ON/OFF
-    private val enableDelete: Boolean = true // 삭제 버튼 표시 여부
+    private val onDelete: (BarcodeResponse) -> Unit,
+    private val enableSelection: Boolean = false,
+    private val enableDelete: Boolean = true
 ) : RecyclerView.Adapter<ShoppingAdapter.ViewHolder>() {
 
-    // 선택 식재료 저장
     private val selectedItems = mutableSetOf<ShoppingItem>()
 
     inner class ViewHolder(private val binding: ItemShoppingBinding) : RecyclerView.ViewHolder(binding.root) {
-
         fun bind(item: ShoppingItem, isSelected: Boolean) {
-            binding.itemName.text = item.name
+            binding.itemName.text = item.name  // ✔ itemName으로 수정
             binding.warningIcon.visibility = if (item.showWarning) View.VISIBLE else View.GONE
-            binding.root.isSelected = enableSelection && isSelected
 
-            // 삭제 버튼 표시 여부 제어
+            // 선택 활성화 시 배경 처리
+            if (enableSelection) {
+                binding.root.isSelected = isSelected
+                binding.root.setBackgroundResource(
+                    if (isSelected) R.drawable.red_border
+                    else R.drawable.item_background_selector
+                )
+            }
+
             binding.deleteIcon.visibility = if (enableDelete) View.VISIBLE else View.GONE
+            binding.deleteIcon.setOnClickListener {
+                onDelete(
+                    BarcodeResponse(
+                        barcodeNum = "",   // 실제 barcodeNum 필요하면 추가 로직 필요
+                        ingredientName = item.name,
+                        price = 0
+                    )
+                )
+            }
 
             binding.root.setOnClickListener {
                 if (enableSelection) {
-                    if (selectedItems.contains(item)) {
-                        selectedItems.remove(item)
-                    } else {
-                        selectedItems.add(item)
-                    }
-                    notifyItemChanged(adapterPosition)
+                    toggleSelection(item)
                 }
-            }
-            // 식재료 삭제
-            binding.deleteIcon.setOnClickListener {
-                if (enableDelete) onDelete(item)
             }
         }
     }
@@ -49,22 +54,28 @@ class ShoppingAdapter(
         return ViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
-        val isSelected = selectedItems.contains(item)
-        holder.bind(item, isSelected)
-    }
-
     override fun getItemCount(): Int = items.size
 
-    fun removeItem(item: ShoppingItem) {
-        val index = items.indexOf(item)
-        if (index != -1) {
-            items.removeAt(index)
-            selectedItems.remove(item)
-            notifyItemRemoved(index)
-        }
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val item = items[position]
+        holder.bind(item, selectedItems.contains(item))
     }
-    // 외부에서 선택된 식재료 가져오기
+
+    fun updateItems(newItems: List<ShoppingItem>) {
+        items.clear()
+        items.addAll(newItems)
+        selectedItems.clear()
+        notifyDataSetChanged()
+    }
+
     fun getSelectedItems(): List<ShoppingItem> = selectedItems.toList()
+
+    private fun toggleSelection(item: ShoppingItem) {
+        if (selectedItems.contains(item)) {
+            selectedItems.remove(item)
+        } else {
+            selectedItems.add(item)
+        }
+        notifyDataSetChanged()
+    }
 }

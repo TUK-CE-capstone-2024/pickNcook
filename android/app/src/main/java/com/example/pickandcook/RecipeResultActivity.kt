@@ -8,16 +8,15 @@ import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.example.pickandcook.R
+import com.example.pickandcook.api.RecipeItem
 import com.example.pickandcook.databinding.ActivityRecipeResultBinding
 
 class RecipeResultActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRecipeResultBinding
-
-    private val recipeList = listOf("채소 볶음", "비빔밥", "달걀말이")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,9 +27,11 @@ class RecipeResultActivity : AppCompatActivity() {
             finish()
         }
 
-        recipeList.forEach { recipeName ->
+        val recipeList = intent.getParcelableArrayListExtra<RecipeItem>("recipes") ?: arrayListOf()
+
+        recipeList.forEach { recipeItem ->
             val tv = TextView(this).apply {
-                text = recipeName
+                text = recipeItem.recipeName
                 setPadding(48, 60, 48, 60)
                 textSize = 22f
                 setTypeface(null, Typeface.BOLD)
@@ -48,13 +49,12 @@ class RecipeResultActivity : AppCompatActivity() {
 
                 setOnClickListener {
                     val intent = Intent(this@RecipeResultActivity, RecipeDetailActivity::class.java).apply {
-                        putExtra("recipeName", recipeName)
+                        putExtra("recipeNo", recipeItem.recipeNo)
+                        putExtra("recipeName", recipeItem.recipeName)
                     }
                     startActivity(intent)
                 }
-
             }
-
             binding.recipeContainer.addView(tv)
         }
     }

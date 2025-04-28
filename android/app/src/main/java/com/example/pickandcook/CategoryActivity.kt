@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.example.pickandcook.R
 import com.example.pickandcook.databinding.ActivityCategoryBinding
 
 class CategoryActivity : AppCompatActivity() {
@@ -144,7 +145,13 @@ class CategoryActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             Toast.makeText(this, selectedMap.values.joinToString(), Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, RecipeResultActivity::class.java)
+            val intent = Intent(this, RecipeRecommendation::class.java)
+
+            // 카테고리 선택 값 인텐트에 넣기 (달라진 부분 -> 어디로 해결)
+            intent.putExtra("category_kind", selectedMap["   종류별"])
+            intent.putExtra("category_situation", selectedMap["   상황별"])
+            intent.putExtra("category_method", selectedMap["   방법별"])
+
             startActivity(intent)
         }
     }

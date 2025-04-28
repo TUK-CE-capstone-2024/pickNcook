@@ -3,6 +3,8 @@ package com.example.pickandcook.api
 import com.google.gson.annotations.SerializedName
 import retrofit2.Call
 import retrofit2.http.*
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
 data class User(
     val id: String,
@@ -20,11 +22,18 @@ data class LoginResponse(
     val userId: String? = null
 )
 
+
 // 바코드 응답
 data class BarcodeResponse(
     val barcodeNum: String,
     val ingredientName: String,
     val price: Int
+)
+
+data class FridgeItem(
+    val fridgeIngredientNo: Int,
+    val userId: String,
+    val fridgeIngredient: String
 )
 
 // 장바구니 추가 요청 DTO
@@ -48,6 +57,19 @@ data class ShoppingListDetail(
     @SerializedName("ingredient")
     val ingredientName: String       // 재료명
 )
+data class SaveRecipeRequest(
+    val recipeNo: Int,
+    val userId: String
+)
+data class SaveRecipeResponse(
+    val message: String?
+)
+
+@Parcelize
+data class RecipeItem(
+    val recipeNo: Int,
+    val recipeName: String
+) : Parcelable
 
 interface ApiService {
     @POST("/main/register")
@@ -59,12 +81,22 @@ interface ApiService {
     @GET("/api/barcode/{barcodeNum}")
     fun getProduct(@Path("barcodeNum") barcodeNum: String): Call<BarcodeResponse>
 
+    @GET("/api/fridge/{userId}")
+    fun getFridgeItems(@Path("userId") userId: String): Call<List<FridgeItem>>
+
+
     // 장바구니에 추가
     @POST("/api/cart/add")
     fun addToCart(@Body cartRequest: CartRequest): Call<CartResponse>
 
     @GET("/api/cart/{userId}")
     fun getCartItems(@Path("userId") userId: String): Call<List<BarcodeResponse>>
+
+    @DELETE("/api/cart/delete")
+    fun deleteCartItem(
+        @Query("userId") userId: String,
+        @Query("barcode") barcode: String
+    ): Call<Map<String, String>>
 
     @GET("/api/cart/{userId}/totalPrice")
     fun getTotalCartPrice(@Path("userId") userId: String): Call<Map<String, Int>>
@@ -100,5 +132,9 @@ interface ApiService {
     @DELETE("/api/shopping-list/detail/delete/{detailNo}")
     fun deleteIngredient(@Path("detailNo") detailNo: Int): Call<Map<String, String>>
 
+    @POST("/api/recipe-storage/add")
+    fun saveRecipe(@Body request: SaveRecipeRequest): Call<SaveRecipeResponse>
 
+    @GET("/api/recipe-storage/{userId}")
+    fun getSavedRecipes(@Path("userId") userId: String): Call<List<String>>
 }
