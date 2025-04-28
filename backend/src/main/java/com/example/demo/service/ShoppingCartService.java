@@ -44,6 +44,18 @@ public class ShoppingCartService {
         return barcodeList;
     }
     
+    public boolean deleteCartItem(String userId, String barcode) {
+        List<ShoppingCart> items = shoppingCartRepository.findByUserId(userId);
+        for (ShoppingCart item : items) {
+            if (item.getBarcode().equals(barcode)) {
+                shoppingCartRepository.delete(item);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    
     public int calculateTotalPrice(String userId) {
         List<ShoppingCart> cartItems = shoppingCartRepository.findByUserId(userId);
         int totalPrice = 0;

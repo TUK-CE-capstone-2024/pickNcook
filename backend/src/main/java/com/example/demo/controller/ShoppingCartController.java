@@ -56,6 +56,23 @@ public class ShoppingCartController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/delete")
+    public ResponseEntity<Map<String, String>> deleteCartItem(
+            @RequestParam("userId") String userId,
+            @RequestParam("barcode") String barcode) {
+
+        Map<String, String> response = new HashMap<>();
+
+        boolean deleted = shoppingCartService.deleteCartItem(userId, barcode);
+        if (deleted) {
+            response.put("message", "삭제 성공");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("error", "삭제 실패");
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
 }
 
 // 요청을 받기 위한 DTO

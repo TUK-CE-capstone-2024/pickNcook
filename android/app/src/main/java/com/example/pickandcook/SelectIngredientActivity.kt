@@ -57,7 +57,7 @@ class SelectIngredientActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerViews() {
-        binding.fridgeRecyclerView.layoutManager = GridLayoutManager(this, 2)
+        binding.fridgeRecyclerView.layoutManager = GridLayoutManager(this, 4)
         fridgeAdapter = FridgeAdapter(mutableListOf(), enableSelection = true)
         binding.fridgeRecyclerView.adapter = fridgeAdapter
 
