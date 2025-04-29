@@ -1,8 +1,13 @@
 import java.util.Properties
+
     plugins {
         alias(libs.plugins.android.application)
         alias(libs.plugins.kotlin.android)
         id("kotlin-parcelize")
+    }
+
+    val apikeyProperties = Properties().apply {
+        load(rootProject.file("apikey.properties").inputStream())
     }
 
     android {
@@ -15,11 +20,11 @@ import java.util.Properties
             targetSdk = 34
             versionCode = 1
             versionName = "1.0"
-            val apikeyProperties = Properties().apply {
-                load(rootProject.file("apikey.properties").inputStream())
-            }
-            buildConfigField("String", "API_KEY", "\"${apikeyProperties["API_KEY"]}\"")
-
+            buildConfigField(
+                "String",
+                "API_KEY",
+                "\"${apikeyProperties.getProperty("API_KEY")}\""
+            )
             testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
 

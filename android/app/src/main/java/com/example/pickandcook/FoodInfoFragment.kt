@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.pickandcook.databinding.FragmentFoodInfoBinding
 import com.example.pickandcook.api.* // ChatGPT API 의존성
-import com.google.zxing.client.android.BuildConfig
 import kotlinx.coroutines.*
 
 class FoodInfoFragment : Fragment() {
