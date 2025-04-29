@@ -5,117 +5,131 @@
     android:layout_height="match_parent"
     android:background="@color/main"
     android:gravity="center"
+    android:orientation="vertical"
     android:paddingStart="200dp"
     android:paddingEnd="200dp">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_height="400dp"
         android:background="@drawable/bg_rounded"
-        android:padding="60dp"
         android:backgroundTint="#FDF9EC"
         android:orientation="vertical"
+        android:padding="40dp"
         android:gravity="center_horizontal">
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/foodImage"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_placeholder" />
-
-            <TextView
-                android:id="@+id/foodName"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="호박"
-                android:textSize="25sp"
-                android:textStyle="bold"
-                android:layout_marginStart="10dp" />
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
 
-            <ImageView
-                android:id="@+id/btnFavorite"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="30dp"
-                android:src="@drawable/ic_heart_black"
-                android:contentDescription="즐겨찾기" />
+                <!-- 이름 + 이미지 + 버튼들 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
-            <!-- 공간 밀어내기 -->
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+                    <ImageView
+                        android:id="@+id/foodImage"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:src="@drawable/ic_placeholder" />
 
-            <ImageView
-                android:id="@+id/btnClose"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_close" />
-        </LinearLayout>
+                    <TextView
+                        android:id="@+id/foodName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="호박"
+                        android:textSize="@dimen/title2_text_size"
+                        android:textStyle="bold"
+                        android:layout_marginStart="10dp" />
 
+                    <ImageView
+                        android:id="@+id/btnFavorite"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginStart="30dp"
+                        android:src="@drawable/ic_heart_black"
+                        android:contentDescription="즐겨찾기" />
 
-        <!-- 영양 정보 -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="영양 성분"
-            android:textStyle="bold"
-            android:textSize="22sp"
-            android:layout_marginTop="30dp"
-            android:layout_marginStart="5dp"/>
+                    <!-- 공간 밀어내기 -->
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
 
-        <TextView
-            android:id="@+id/foodNutrition"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="• 칼로리: 27 kcal\n• 탄수화물: 6.6g\n• 비타민 A, C, 칼슘 풍부"
-            android:textSize="18sp"
-            android:layout_marginTop="4dp"
-            android:layout_marginStart="5dp"/>
+                    <ImageView
+                        android:id="@+id/btnClose"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_close" />
+                </LinearLayout>
 
-        <!-- 효능 -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="효능"
-            android:textStyle="bold"
-            android:textSize="22sp"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="5dp"/>
+                <!-- 영양성분 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="영양 성분"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/body_text_size"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginStart="5dp"/>
 
-        <TextView
-            android:id="@+id/foodEffect"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="• 면역력 강화\n• 시력 보호\n• 혈압 조절\n• 소화 촉진\n• 다이어트에 도움"
-            android:textSize="18sp"
-            android:layout_marginTop="4dp"
-            android:layout_marginStart="5dp"/>
+                <TextView
+                    android:id="@+id/foodNutrition"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• 칼로리: 27 kcal\n• 탄수화물: 6.6g\n• 비타민 A, C, 칼슘 풍부"
+                    android:textSize="@dimen/body_text_size"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="5dp"/>
 
-        <!-- 보관 방법 -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="보관 방법"
-            android:textStyle="bold"
-            android:textSize="22sp"
-            android:layout_marginTop="16dp"
-            android:layout_marginStart="5dp"/>
+                <!-- 효능 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="효능"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/body_text_size"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="5dp"/>
 
-        <TextView
-            android:id="@+id/foodStorage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="• 통째로: 서늘한 곳, 2~3개월\n• 자른 후: 냉장 3일, 냉동 36개월\n• 조리 후: 냉장 2~3일"
-            android:textSize="18sp"
-            android:layout_marginTop="4dp"
-            android:layout_marginStart="5dp"/>
+                <TextView
+                    android:id="@+id/foodEffect"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• 면역력 강화\n• 시력 보호\n• 혈압 조절\n• 소화 촉진\n• 다이어트에 도움"
+                    android:textSize="@dimen/body_text_size"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="5dp"/>
+
+                <!-- 보관 방법 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="보관 방법"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/body_text_size"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginStart="5dp"/>
+
+                <TextView
+                    android:id="@+id/foodStorage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• 통째로: 서늘한 곳, 2~3개월\n• 자른 후: 냉장 3일, 냉동 36개월\n• 조리 후: 냉장 2~3일"
+                    android:textSize="@dimen/body_text_size"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="5dp"/>
+
+            </LinearLayout>
+        </ScrollView>
 
     </LinearLayout>
 </LinearLayout>

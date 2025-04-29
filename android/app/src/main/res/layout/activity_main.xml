@@ -15,7 +15,7 @@
         android:id="@+id/menu_navi"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:itemIconSize="40dp"
+        app:itemIconSize="35dp"
         app:itemTextAppearanceActive="@style/BottomNavTextActive"
         app:itemTextAppearanceInactive="@style/BottomNavTextInactive"
         app:itemTextColor="@drawable/color_navi_click"

@@ -9,9 +9,6 @@ import androidx.fragment.app.Fragment
 import com.example.pickandcook.databinding.FragmentFoodInfoBinding
 import com.example.pickandcook.api.* // ChatGPT API 의존성
 import kotlinx.coroutines.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class FoodInfoFragment : Fragment() {
 
@@ -74,32 +71,40 @@ class FoodInfoFragment : Fragment() {
     // 식재료 정보 조회 함수 (달라진 부분)
     private fun fetchIngredientInfo(ingredient: String) {
         val prompt = """
-            당신은 영양 전문가입니다.
+당신은 영양 전문가입니다.
 
-            다음 식재료에 대해 아래 세 가지 항목만 설명하세요. **다른 식재료와 비교하지 마세요. 일반적인 설명 없이, 지정된 식재료에 대해서만 대답하세요.**
+다음 식재료에 대해 아래 세 가지 항목을 설명하세요.
 
-            식재료: "$ingredient"
+요구사항:
+- 각 항목을 "• "로 시작하세요.
+- 한 줄에 하나의 항목만 작성하세요.
+- 여러 항목을 한 줄에 이어서 쓰지 마세요. 반드시 줄바꿈하세요.
+- 다른 식재료와 비교하거나 추가 설명은 하지 마세요.
 
-            1. 주요 영양 성분
-            2. 건강에 좋은 효능
-            3. 보관 방법
+식재료: "$ingredient"
 
-            다음 형식을 꼭 지키세요. 번호와 항목 제목을 포함해 한글로 출력하세요:
+1. 주요 영양 성분
+2. 건강에 좋은 효능
+3. 보관 방법
 
-            {
-              1. 영양 성분: "...",
-              2. 효능: "...",
-              3. 보관 방법: "..."
-            }
+아래 형식으로 출력하세요:
 
-            다른 말은 하지 마세요.
-        """.trimIndent()
+{
+  1. 영양 성분: "...",
+  2. 효능: "...",
+  3. 보관 방법: "..."
+}
 
+예시)
+  1. 영양 성분: "• 단백질\n• 비타민 A\n• 비타민 D\n• 비타민 B12\n• 철분",
+  2. 효능: "• 근육 성장 촉진\n• 면역력 강화\n• 눈 건강 증진\n• 뼈 건강 유지\n• 뇌 기능 지원",
+  3. 보관 방법: "• 냉장 보관\n• 유통기한 확인\n• 껍질이 깨지지 않도록 주의"
+
+추가 안내나 다른 텍스트는 절대 포함하지 마세요.
+""".trimIndent()
         val request = ChatRequest(
             messages = listOf(Message(role = "user", content = prompt))
         )
-
-
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -132,14 +137,14 @@ class FoodInfoFragment : Fragment() {
         // 전체 응답을 출력 (디버깅용)
         Log.d("FoodInfoFragment", "파싱 전 원본 응답: $reply")
 
-        val nutrition = Regex("""1\.\s*영양 성분:\s*"?(.*?)"?\s*(,|\})""")
-            .find(reply)?.groupValues?.get(1)?.trim()
+        val nutrition = Regex("""1\.\s*영양 성분:\s*"([^"]+)""")
+            .find(reply)?.groupValues?.get(1)?.trim()?.replace("\\n", "\n")
 
-        val effect = Regex("""2\.\s*효능:\s*"?(.*?)"?\s*(,|\})""")
-            .find(reply)?.groupValues?.get(1)?.trim()
+        val effect = Regex("""2\.\s*효능:\s*"([^"]+)""")
+            .find(reply)?.groupValues?.get(1)?.trim()?.replace("\\n", "\n")
 
-        val storage = Regex("""3\.\s*보관 방법:\s*"?(.*?)"?\s*(,|\})""")
-            .find(reply)?.groupValues?.get(1)?.trim()
+        val storage = Regex("""3\.\s*보관 방법:\s*"([^"]+)""")
+            .find(reply)?.groupValues?.get(1)?.trim()?.replace("\\n", "\n")
 
         binding.foodNutrition.text = nutrition ?: "영양 정보 없음"
         binding.foodEffect.text = effect ?: "효능 정보 없음"

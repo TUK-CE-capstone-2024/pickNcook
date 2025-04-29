@@ -17,7 +17,7 @@ import java.sql.SQLException
  */
 object MySQLHelper {
     // MySQL 연결 정보 (10.0.2.2: 에뮬레이터에서 로컬호스트 접속)
-    private const val URL = "jdbc:mysql://192.168.72.108:3306/pickandcookdb?serverTimezone=UTC"
+    private const val URL = "jdbc:mysql://192.168.73.223:3306/pickandcookdb?serverTimezone=UTC"
     private const val USER = "root"
     private const val PASSWORD = "1234"
 

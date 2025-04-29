@@ -4,12 +4,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.pickandcook.api.BarcodeResponse
 import com.example.pickandcook.databinding.ItemShoppingBinding
 
 class ShoppingAdapter(
     private val items: MutableList<ShoppingItem>,
-    private val onDelete: (BarcodeResponse) -> Unit,
+    private val onDelete: (ShoppingItem) -> Unit,
     private val enableSelection: Boolean = false,
     private val enableDelete: Boolean = true
 ) : RecyclerView.Adapter<ShoppingAdapter.ViewHolder>() {
@@ -19,7 +18,7 @@ class ShoppingAdapter(
     inner class ViewHolder(private val binding: ItemShoppingBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: ShoppingItem, isSelected: Boolean) {
             binding.itemName.text = item.name  // ✔ itemName으로 수정
-            binding.warningIcon.visibility = if (item.showWarning) View.VISIBLE else View.GONE
+            binding.warningIcon.visibility = if (item.showWarning) View.VISIBLE else View.INVISIBLE
 
             // 선택 활성화 시 배경 처리
             if (enableSelection) {
@@ -32,13 +31,7 @@ class ShoppingAdapter(
 
             binding.deleteIcon.visibility = if (enableDelete) View.VISIBLE else View.GONE
             binding.deleteIcon.setOnClickListener {
-                onDelete(
-                    BarcodeResponse(
-                        barcodeNum = "",   // 실제 barcodeNum 필요하면 추가 로직 필요
-                        ingredientName = item.name,
-                        price = 0
-                    )
-                )
+                onDelete(item)
             }
 
             binding.root.setOnClickListener {
@@ -66,6 +59,14 @@ class ShoppingAdapter(
         items.addAll(newItems)
         selectedItems.clear()
         notifyDataSetChanged()
+    }
+
+    fun removeItem(item: ShoppingItem) {
+        val position = items.indexOf(item)
+        if (position != -1) {
+            items.removeAt(position)
+            notifyItemRemoved(position)
+        }
     }
 
     fun getSelectedItems(): List<ShoppingItem> = selectedItems.toList()

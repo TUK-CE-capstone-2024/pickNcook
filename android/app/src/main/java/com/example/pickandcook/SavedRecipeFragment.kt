@@ -58,10 +58,10 @@ class SavedRecipeFragment : Fragment() {
                         for (recipeName in recipes) {
                             val textView = TextView(requireContext()).apply {
                                 text = recipeName
-                                textSize = 22f
+                                textSize = 18f
                                 setTypeface(null, Typeface.BOLD)
                                 setTextColor(Color.BLACK)
-                                setPadding(48, 60, 48, 60)
+                                setPadding(40, 60, 40, 60)
                                 background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_rounded)
                                 layoutParams = LinearLayout.LayoutParams(
                                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -71,7 +71,6 @@ class SavedRecipeFragment : Fragment() {
                                 }
                                 gravity = android.view.Gravity.CENTER
 
-                                // ✅ 레시피를 누르면 상세 화면으로 이동
                                 setOnClickListener {
                                     val intent = Intent(requireContext(), RecipeDetailActivity::class.java)
                                     intent.putExtra("recipeName", recipeName) // 레시피 이름 넘기기

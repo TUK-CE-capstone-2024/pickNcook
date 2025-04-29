@@ -12,8 +12,8 @@
     <!-- 식재료 이미지 -->
     <ImageView
         android:id="@+id/foodImage"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
         android:layout_weight="1"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
@@ -24,12 +24,10 @@
         android:id="@+id/foodName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minWidth="120dp"
+        android:minWidth="50dp"
         android:text="식재료"
         android:textSize="@dimen/food_text_size"
-        android:textStyle="bold"
         android:maxLines="1"
         android:layout_marginTop="10dp"
         android:gravity="center"/>
 </LinearLayout>
-

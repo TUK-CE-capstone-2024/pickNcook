@@ -23,33 +23,21 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="쇼핑카트"
-                android:textAppearance="@style/TitleTextStyle"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"
+                android:text="레시피 추천"
+                android:textAppearance="@style/TitleTextStyle" />
         </androidx.appcompat.widget.Toolbar>
 
-
-        <!-- 쇼핑카트 리스트 -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/recipeContainer"
+            android:layout_width="700dp"
             android:layout_height="wrap_content"
-            android:importantForAccessibility="no"
+            android:orientation="vertical"
             android:padding="16dp"
+            android:gravity="center_horizontal"
             app:layout_constraintTop_toBottomOf="@id/toolbar"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-        <!-- 하단 카메라 버튼 -->
-        <ImageView
-            android:id="@+id/cameraButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="15dp"
-            android:src="@drawable/ic_camera"
-            android:contentDescription="카메라"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

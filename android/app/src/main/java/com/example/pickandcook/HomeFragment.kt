@@ -1,15 +1,10 @@
 package com.example.pickandcook
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.pickandcook.FridgeFragment
-import com.example.pickandcook.R
-import com.example.pickandcook.SelectIngredientActivity
-import com.example.pickandcook.ShoppingCartFragment
 import com.example.pickandcook.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment() {
@@ -47,10 +42,19 @@ class HomeFragment : Fragment() {
                 .commit()
         }
 
+//        binding.recipeButton.setOnClickListener {
+//            val intent = Intent(requireContext(), SelectIngredientActivity::class.java)
+//            startActivity(intent)
+//        }
         binding.recipeButton.setOnClickListener {
-            val intent = Intent(requireContext(), SelectIngredientActivity::class.java)
-            startActivity(intent)
+            val fragment = SelectIngredientFragment()
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.mainFragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
         }
+
 
     }
 

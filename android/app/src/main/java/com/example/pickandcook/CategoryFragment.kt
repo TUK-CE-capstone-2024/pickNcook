@@ -1,23 +1,26 @@
 package com.example.pickandcook
 
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.TypedValue
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.example.pickandcook.databinding.ActivityCategoryBinding
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
+import com.example.pickandcook.databinding.FragmentCategoryBinding
 
-class CategoryActivity : AppCompatActivity() {
+class CategoryFragment : Fragment() {
 
-    private lateinit var binding: ActivityCategoryBinding
+    private var _binding: FragmentCategoryBinding? = null
+    private val binding get() = _binding!!
 
     private val categories = mapOf(
         "   종류별" to listOf(
@@ -33,23 +36,59 @@ class CategoryActivity : AppCompatActivity() {
             listOf("데치기", "회", "기타")
         )
     )
+
     // 그룹별 선택 항목 저장용
     private val selectedMap = mutableMapOf<String, String>()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityCategoryBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentCategoryBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         binding.toolbar.setNavigationOnClickListener {
-            finish()
+            parentFragmentManager.popBackStack()
         }
 
-        //카테고리 UI 동적 생성
+        setupCategoryUI()
+
+        // 카테고리 넘기는 작업
+        binding.btnNext.setOnClickListener {
+            if (selectedMap.isEmpty()) {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("알림")
+                    .setMessage("카테고리를 하나 이상 선택해주세요.")
+                    .setPositiveButton("확인", null)
+                    .show()
+                return@setOnClickListener
+            }
+            Toast.makeText(requireContext(), selectedMap.values.joinToString(), Toast.LENGTH_SHORT).show()
+
+            // 카테고리 선택 값 넣기 (달라진 부분 -> 어디로 해결)
+            val bundle = Bundle().apply {
+                putString("category_kind", selectedMap["   종류별"])
+                putString("category_situation", selectedMap["   상황별"])
+                putString("category_method", selectedMap["   방법별"])
+            }
+
+            parentFragmentManager.commit {
+                replace(R.id.mainFragmentContainer, RecipeRecommendationFragment().apply { arguments = bundle })
+                addToBackStack(null)
+            }
+        }
+    }
+
+    // 카테고리 UI 동적 생성
+    private fun setupCategoryUI() {
         categories.entries.forEachIndexed { index, (groupName, groupedRows) ->
 
             // 그룹명 (제목 텍스트)
-            val titleView = TextView(this).apply {
+            val titleView = TextView(requireContext()).apply {
                 text = groupName
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
                 setTypeface(null, Typeface.BOLD)
@@ -59,7 +98,7 @@ class CategoryActivity : AppCompatActivity() {
             binding.category.addView(titleView)
 
             groupedRows.forEach { rowList ->
-                val rowLayout = LinearLayout(this).apply {
+                val rowLayout = LinearLayout(requireContext()).apply {
                     orientation = LinearLayout.HORIZONTAL
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
@@ -68,10 +107,10 @@ class CategoryActivity : AppCompatActivity() {
                 }
 
                 rowList.forEach { category ->
-                    val tv = TextView(this).apply {
+                    val tv = TextView(requireContext()).apply {
                         text = category
                         setPadding(15, 6, 15, 6)
-                        background = ContextCompat.getDrawable(this@CategoryActivity, R.drawable.default_border)
+                        background = ContextCompat.getDrawable(requireContext(), R.drawable.default_border)
                         setTextColor(Color.BLACK)
                         setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
                         setTypeface(null, Typeface.NORMAL)
@@ -79,42 +118,40 @@ class CategoryActivity : AppCompatActivity() {
                             ViewGroup.LayoutParams.WRAP_CONTENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT
                         ).apply { setMargins(7, 7, 7, 7) }
-
                         tag = "$groupName:$category"
 
                         setOnClickListener {
                             val previous = selectedMap[groupName]
                             if (previous == category) {
                                 selectedMap.remove(groupName)
-                                background = ContextCompat.getDrawable(this@CategoryActivity, R.drawable.default_border)
+                                background = ContextCompat.getDrawable(requireContext(), R.drawable.default_border)
                             } else {
                                 // 기존 선택 해제
                                 groupedRows.flatten().forEach { item ->
                                     binding.category.findViewWithTag<TextView>("$groupName:$item")
-                                        ?.background = ContextCompat.getDrawable(this@CategoryActivity, R.drawable.default_border)
+                                        ?.background = ContextCompat.getDrawable(requireContext(), R.drawable.default_border)
                                 }
                                 selectedMap[groupName] = category
-                                background = ContextCompat.getDrawable(this@CategoryActivity, R.drawable.red_border)
+                                background = ContextCompat.getDrawable(requireContext(), R.drawable.red_border)
                             }
                         }
                     }
                     rowLayout.addView(tv)
                 }
-
                 binding.category.addView(rowLayout)
             }
 
             // 그룹 간 구분선 추가 (마지막 그룹 제외)
             if (index < categories.size - 1) {
-                val dividerContainer = LinearLayout(this).apply {
+                val dividerContainer = LinearLayout(requireContext()).apply {
                     layoutParams = LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     )
-                    gravity = android.view.Gravity.CENTER_HORIZONTAL
+                    gravity = Gravity.CENTER_HORIZONTAL
                 }
 
-                val divider = View(this).apply {
+                val divider = View(requireContext()).apply {
                     layoutParams = LinearLayout.LayoutParams(
                         dpToPx(650),
                         2
@@ -128,30 +165,6 @@ class CategoryActivity : AppCompatActivity() {
                 dividerContainer.addView(divider)
                 binding.category.addView(dividerContainer)
             }
-
-
-        }
-
-
-        // 카테고리 넘기는 작업 해야함 (어디로?)
-        binding.btnNext.setOnClickListener {
-            if (selectedMap.isEmpty()) {
-                AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
-                    .setTitle("알림")
-                    .setMessage("카테고리를 하나 이상 선택해주세요.")
-                    .setPositiveButton("확인", null)
-                    .show()
-                return@setOnClickListener
-            }
-            Toast.makeText(this, selectedMap.values.joinToString(), Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, RecipeRecommendation::class.java)
-
-            // 카테고리 선택 값 인텐트에 넣기 (달라진 부분 -> 어디로 해결)
-            intent.putExtra("category_kind", selectedMap["   종류별"])
-            intent.putExtra("category_situation", selectedMap["   상황별"])
-            intent.putExtra("category_method", selectedMap["   방법별"])
-
-            startActivity(intent)
         }
     }
 
@@ -159,5 +172,8 @@ class CategoryActivity : AppCompatActivity() {
         return (dp * resources.displayMetrics.density).toInt()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }
-

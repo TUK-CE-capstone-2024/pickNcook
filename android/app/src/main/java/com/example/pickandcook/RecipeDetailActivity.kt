@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
@@ -82,8 +82,15 @@ class RecipeDetailActivity : AppCompatActivity() {
                 // 2. Jsoup 크롤링
                 val doc = Jsoup.connect(recipeUrl).userAgent("Mozilla/5.0").get()
                 val title = doc.selectFirst("h1.view2_summary_stitle")?.text()?.trim() ?: keyword
-                val ingredients = doc.select("div.ready_ingre3 ul li").joinToString("\n") { "- ${it.text()}" }
-                val steps = doc.select("div.view_step div.media-body").joinToString("\n") { "• ${it.text()}" }
+
+                val ingredientUl = doc.select("div.ready_ingre3 ul").first()
+                val ingredients = ingredientUl?.select("li")?.joinToString("\n") {
+                    "- ${it.text().replace("구매", "").trim()}"
+                } ?: "재료 정보 없음"
+
+                val steps = doc.select("div.view_step div.media-body").joinToString("\n") {
+                    "• ${it.ownText().trim()}"
+                }
 
                 val resultText = """
 🍽 $title
@@ -100,14 +107,12 @@ $steps
                 // 3. UI 업데이트
                 withContext(Dispatchers.Main) {
                     binding.recipeName.text = title
-                    binding.infoCard.setOnClickListener {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(recipeUrl))
-                        startActivity(intent)
-                    }
+                    // binding.infoCard.removeAllViews() 삭제!
 
-                    val detailView = android.widget.TextView(this@RecipeDetailActivity).apply {
+                    val detailView = TextView(this@RecipeDetailActivity).apply {
                         text = resultText
-                        textSize = 18f
+                        textSize = 15f
+                        setLineSpacing(12f, 1.3f)
                         setPadding(0, 150, 0, 0)
                     }
                     binding.infoCard.addView(detailView)
@@ -135,7 +140,7 @@ $steps
      * 에러 메시지 표시 함수
      */
     private fun showError(message: String) {
-        val errorView = android.widget.TextView(this).apply {
+        val errorView = TextView(this).apply {
             text = message
             textSize = 18f
             setTextColor(android.graphics.Color.RED)
@@ -155,16 +160,13 @@ $steps
             return
         }
 
-        val request = SaveRecipeRequest(
-            recipeNo = recipeNo,
-            userId = userId
-        )
+        val request = SaveRecipeRequest(recipeNo, userId)
 
         RetrofitClient.instance.saveRecipe(request)
-            .enqueue(object : Callback<com.example.pickandcook.api.SaveRecipeResponse> {
+            .enqueue(object : Callback<SaveRecipeResponse> {
                 override fun onResponse(
-                    call: Call<com.example.pickandcook.api.SaveRecipeResponse>,
-                    response: Response<com.example.pickandcook.api.SaveRecipeResponse>
+                    call: Call<SaveRecipeResponse>,
+                    response: Response<SaveRecipeResponse>
                 ) {
                     if (response.isSuccessful) {
                         Toast.makeText(this@RecipeDetailActivity, "저장 완료", Toast.LENGTH_SHORT).show()
@@ -175,7 +177,7 @@ $steps
                     }
                 }
 
-                override fun onFailure(call: Call<com.example.pickandcook.api.SaveRecipeResponse>, t: Throwable) {
+                override fun onFailure(call: Call<SaveRecipeResponse>, t: Throwable) {
                     Toast.makeText(this@RecipeDetailActivity, "오류: ${t.message}", Toast.LENGTH_SHORT).show()
                 }
             })

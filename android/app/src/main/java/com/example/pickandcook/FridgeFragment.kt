@@ -137,7 +137,7 @@ class FridgeFragment : Fragment() {
 
     private fun calSpanCount(): Int {
         val screenWidth = resources.displayMetrics.widthPixels
-        val itemMinWidth = 150 * resources.displayMetrics.density // 아이템 하나 최소 150dp
+        val itemMinWidth = 100 * resources.displayMetrics.density // 아이템 하나 최소 100dp
         return (screenWidth / itemMinWidth).toInt().coerceAtLeast(2)
     }
 
