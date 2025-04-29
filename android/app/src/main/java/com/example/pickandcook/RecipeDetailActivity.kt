@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
+import android.text.util.Linkify
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -114,6 +116,8 @@ $steps
                         textSize = 15f
                         setLineSpacing(12f, 1.3f)
                         setPadding(0, 150, 0, 0)
+                        autoLinkMask = Linkify.WEB_URLS
+                        movementMethod = LinkMovementMethod.getInstance()
                     }
                     binding.infoCard.addView(detailView)
                 }

@@ -136,7 +136,7 @@ class CategoryActivity : AppCompatActivity() {
         // 카테고리 넘기는 작업 해야함 (어디로?)
         binding.btnNext.setOnClickListener {
             if (selectedMap.isEmpty()) {
-                AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
+                AlertDialog.Builder(this)
                     .setTitle("알림")
                     .setMessage("카테고리를 하나 이상 선택해주세요.")
                     .setPositiveButton("확인", null)
