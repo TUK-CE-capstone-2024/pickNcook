@@ -32,7 +32,7 @@ class RecipeResultFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.toolbar.setNavigationOnClickListener {
-            parentFragmentManager.popBackStack()
+            parentFragmentManager.popBackStack("CategoryFragment", 0)
         }
 
         val recipeList = arguments?.getParcelableArrayList<RecipeItem>("recipes") ?: arrayListOf()

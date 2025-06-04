@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.pickandcook.api.BarcodeResponse
@@ -40,7 +41,13 @@ class SelectIngredientFragment : Fragment() {
         fetchFridgeItems()
 
         binding.toolbar.setNavigationOnClickListener {
-            parentFragmentManager.popBackStack()
+            // 백스택 전부 제거
+            requireActivity().supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+
+            // 홈 프래그먼트 다시 붙이기
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.mainFragmentContainer, HomeFragment())
+                .commit()
         }
 
         binding.nextButton.setOnClickListener {
@@ -59,8 +66,9 @@ class SelectIngredientFragment : Fragment() {
                 IngredientStore.selectedShoppingItems = selectedCartItems
 
                 parentFragmentManager.commit {
-                    replace(R.id.mainFragmentContainer, CategoryFragment())
-                    addToBackStack(null)
+                    hide(this@SelectIngredientFragment)
+                    add(R.id.mainFragmentContainer, CategoryFragment())
+                    addToBackStack("CategoryFragment")
                 }
             }
         }

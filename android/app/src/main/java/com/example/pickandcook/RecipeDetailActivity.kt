@@ -1,11 +1,7 @@
 package com.example.pickandcook
 
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.text.method.LinkMovementMethod
-import android.text.util.Linkify
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -23,56 +19,55 @@ import java.net.URLEncoder
 
 class RecipeDetailActivity : AppCompatActivity() {
 
-
     private lateinit var binding: ActivityRecipeDetailBinding
     private var isSaved = false
-    private lateinit var recipeName: String   // 레시피 이름 저장용
-    private var recipeNo: Int = -1   // 레시피 번호 저장용
+    private var recipeNo: Int = -1
+    private lateinit var recipeTitle: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRecipeDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 1. 툴바 뒤로가기
         binding.toolbar.setNavigationOnClickListener {
             finish()
         }
 
-        // 2. 레시피 이름 받아오기
         recipeNo = intent.getIntExtra("recipeNo", -1)
-        recipeName = intent.getStringExtra("recipeName") ?: ""
-        binding.recipeName.text = recipeName
 
-
-        // db에서 이미지 가져오기
+        // DB에서 제목, 이미지 등 정보 가져오기
         CoroutineScope(Dispatchers.IO).launch {
-            val imageUrl = MySQLHelper.getRecipeImageUrl(recipeName)
-            withContext(Dispatchers.Main) {
-                if (!imageUrl.isNullOrEmpty()) {
-                    Glide.with(this@RecipeDetailActivity)
-                        .load(imageUrl)
-                        .into(binding.recipeImageView)
+            val recipeData = MySQLHelper.getRecipeByNo(recipeNo)  // 아래에 정의해둘 것
+            if (recipeData != null) {
+                recipeTitle = recipeData.rcpTtl
+                val imageUrl = recipeData.rcpImgUrl
+
+                withContext(Dispatchers.Main) {
+                    binding.recipeName.text = recipeTitle
+                    if (!imageUrl.isNullOrEmpty()) {
+                        Glide.with(this@RecipeDetailActivity)
+                            .load(imageUrl)
+                            .into(binding.recipeImageView)
+                    }
+                }
+
+                // 이제 정확한 제목으로 크롤링 시작
+                fetchRecipeDetails(recipeTitle)
+            } else {
+                withContext(Dispatchers.Main) {
+                    showError("레시피 정보를 불러올 수 없습니다.")
                 }
             }
         }
 
-        // 3. 북마크 버튼 클릭 (서버 저장 요청)
         binding.bookmarkBtn.setOnClickListener {
             saveRecipeToStorage()
         }
-
-        // 4. 레시피 크롤링 및 화면 출력
-        fetchRecipeDetails(recipeName)
     }
 
-    /**
-     * 레시피 크롤링 및 표시 함수
-     */
     private fun fetchRecipeDetails(keyword: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // 1. 검색 결과 중 첫 번째 링크 가져오기
                 val recipeUrl = searchRecipeLink(keyword)
                 if (recipeUrl == null) {
                     withContext(Dispatchers.Main) {
@@ -81,7 +76,6 @@ class RecipeDetailActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                // 2. Jsoup 크롤링
                 val doc = Jsoup.connect(recipeUrl).userAgent("Mozilla/5.0").get()
                 val title = doc.selectFirst("h1.view2_summary_stitle")?.text()?.trim() ?: keyword
 
@@ -94,33 +88,13 @@ class RecipeDetailActivity : AppCompatActivity() {
                     "• ${it.ownText().trim()}"
                 }
 
-                val resultText = """
-🍽 $title
-
-📋 재료:
-$ingredients
-
-👨‍🍳 방법:
-$steps
-
-🔗 출처: $recipeUrl
-""".trimIndent()
-
-                // 3. UI 업데이트
                 withContext(Dispatchers.Main) {
                     binding.recipeName.text = title
-                    // binding.infoCard.removeAllViews() 삭제!
-
-                    val detailView = TextView(this@RecipeDetailActivity).apply {
-                        text = resultText
-                        textSize = 15f
-                        setLineSpacing(12f, 1.3f)
-                        setPadding(0, 150, 0, 0)
-                        autoLinkMask = Linkify.WEB_URLS
-                        movementMethod = LinkMovementMethod.getInstance()
-                    }
-                    binding.infoCard.addView(detailView)
+                    binding.recipeIngredients.text = ingredients
+                    binding.recipeSteps.text = steps
+                    binding.recipeSource.text = recipeUrl
                 }
+
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     showError("오류 발생: ${e.message}")
@@ -129,20 +103,27 @@ $steps
         }
     }
 
-    /**
-     * 검색 링크 얻어오기 함수
-     */
     private fun searchRecipeLink(keyword: String): String? {
         val encoded = URLEncoder.encode(keyword, "UTF-8")
         val url = "https://www.10000recipe.com/recipe/list.html?q=$encoded&order=accuracy"
         val doc = Jsoup.connect(url).userAgent("Mozilla/5.0").get()
-        val link = doc.select("ul.common_sp_list_ul li.common_sp_list_li a").firstOrNull()?.attr("href")
-        return if (link != null) "https://www.10000recipe.com$link" else null
+        val recipes = doc.select("ul.common_sp_list_ul li.common_sp_list_li")
+
+        for (recipe in recipes) {
+            val title = recipe.selectFirst(".common_sp_caption_tit")?.text()?.trim()
+            if (title != null && title.contains(keyword)) {
+                val link = recipe.selectFirst("a")?.attr("href")
+                if (link != null) {
+                    return "https://www.10000recipe.com$link"
+                }
+            }
+        }
+
+        return recipes.firstOrNull()?.selectFirst("a")?.attr("href")?.let {
+            "https://www.10000recipe.com$it"
+        }
     }
 
-    /**
-     * 에러 메시지 표시 함수
-     */
     private fun showError(message: String) {
         val errorView = TextView(this).apply {
             text = message
@@ -152,9 +133,6 @@ $steps
         binding.infoCard.addView(errorView)
     }
 
-    /**
-     * 서버에 레시피 저장 요청 보내기
-     */
     private fun saveRecipeToStorage() {
         val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
         val userId = sharedPref.getString("userId", null)

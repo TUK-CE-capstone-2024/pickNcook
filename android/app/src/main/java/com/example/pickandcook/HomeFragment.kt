@@ -42,15 +42,9 @@ class HomeFragment : Fragment() {
                 .commit()
         }
 
-//        binding.recipeButton.setOnClickListener {
-//            val intent = Intent(requireContext(), SelectIngredientActivity::class.java)
-//            startActivity(intent)
-//        }
         binding.recipeButton.setOnClickListener {
-            val fragment = SelectIngredientFragment()
-
             parentFragmentManager.beginTransaction()
-                .replace(R.id.mainFragmentContainer, fragment)
+                .replace(R.id.mainFragmentContainer, SelectIngredientFragment())
                 .addToBackStack(null)
                 .commit()
         }

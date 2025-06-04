@@ -65,7 +65,8 @@ class RecipeRecommendationFragment : Fragment() {
                 }
 
                 parentFragmentManager.commit {
-                    replace(R.id.mainFragmentContainer, fragment)
+                    hide(this@RecipeRecommendationFragment)
+                    add(R.id.mainFragmentContainer, fragment)
                     addToBackStack(null)
                 }
             }

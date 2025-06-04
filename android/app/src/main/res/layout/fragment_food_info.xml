@@ -85,7 +85,7 @@
                     android:id="@+id/foodNutrition"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="• 칼로리: 27 kcal\n• 탄수화물: 6.6g\n• 비타민 A, C, 칼슘 풍부"
+                    android:text=""
                     android:textSize="@dimen/body_text_size"
                     android:layout_marginTop="4dp"
                     android:layout_marginStart="5dp"/>
@@ -104,7 +104,7 @@
                     android:id="@+id/foodEffect"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="• 면역력 강화\n• 시력 보호\n• 혈압 조절\n• 소화 촉진\n• 다이어트에 도움"
+                    android:text=""
                     android:textSize="@dimen/body_text_size"
                     android:layout_marginTop="4dp"
                     android:layout_marginStart="5dp"/>
@@ -123,7 +123,7 @@
                     android:id="@+id/foodStorage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="• 통째로: 서늘한 곳, 2~3개월\n• 자른 후: 냉장 3일, 냉동 36개월\n• 조리 후: 냉장 2~3일"
+                    android:text=""
                     android:textSize="@dimen/body_text_size"
                     android:layout_marginTop="4dp"
                     android:layout_marginStart="5dp"/>

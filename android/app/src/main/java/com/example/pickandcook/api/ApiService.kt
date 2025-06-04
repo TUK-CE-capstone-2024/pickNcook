@@ -72,6 +72,11 @@ data class RecipeItem(
     val recipeName: String
 ) : Parcelable
 
+data class SavedRecipeResponse(
+    val recipeNo: Int,
+    val ckgNm: String
+)
+
 interface ApiService {
     @POST("/main/register")
     fun registerUser(@Body user: User): Call<RegisterResponse>
@@ -136,6 +141,10 @@ interface ApiService {
     @POST("/api/recipe-storage/add")
     fun saveRecipe(@Body request: SaveRecipeRequest): Call<SaveRecipeResponse>
 
+    //@GET("/api/recipe-storage/{userId}")
+    //fun getSavedRecipes(@Path("userId") userId: String): Call<List<String>>
     @GET("/api/recipe-storage/{userId}")
-    fun getSavedRecipes(@Path("userId") userId: String): Call<List<String>>
+    fun getSavedRecipes(@Path("userId") userId: String): Call<List<SavedRecipeResponse>>
+
+
 }

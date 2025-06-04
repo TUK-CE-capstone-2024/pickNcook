@@ -1,6 +1,5 @@
 package com.example.pickandcook
 
-
 import android.util.Log
 import com.example.pickandcook.api.RecipeItem
 import java.sql.Connection
@@ -9,46 +8,43 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
 
+// 레시피 제목과 이미지 정보를 담는 데이터 클래스
+data class RecipeData(
+    val rcpTtl: String,
+    val rcpImgUrl: String?
+)
+
 /**
  * MySQL 데이터베이스에 연결하여
  * - 카테고리 조건 목록 조회
- * - 사용자 선택 조건에 맞는 레시피 이름 목록 조회
- * 를 수행하는 헬퍼 객체 (새로 추가)
+ * - 필터링된 레시피 목록 조회
+ * - 레시피 제목 및 이미지 조회
  */
 object MySQLHelper {
-    // MySQL 연결 정보 (10.0.2.2: 에뮬레이터에서 로컬호스트 접속)
-    private const val URL = "jdbc:mysql://192.168.73.223:3306/pickandcookdb?serverTimezone=UTC"
+    private const val URL = "jdbc:mysql://192.168.160.68:3306/pickandcookdb?serverTimezone=UTC"
     private const val USER = "root"
     private const val PASSWORD = "1234"
 
-    /**
-     * 객체 초기화 시점에 JDBC 드라이버 로드 시도
-     */
     init {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver")   // MySQL 드라이버 로드
+            Class.forName("com.mysql.cj.jdbc.Driver")
             Log.d("MySQL", "✅ 드라이버 로드 성공")
         } catch (e: ClassNotFoundException) {
             Log.e("MySQL", "❌ 드라이버 로드 실패: ${e.message}")
         }
     }
 
-    /**
-     * 특정 컬럼(종류/상황/방법 등)에서 중복 없는 항목 리스트 조회
-     * @param column 조회 대상 컬럼명 (예: CKG_KND_ACTO_NM)
-     * @return 해당 컬럼에서 중복 제거된 값 리스트
-     */
+    // 1. 카테고리 항목 리스트 조회
     fun getCategoryValues(column: String): List<String> {
         val result = mutableListOf<String>()
         val query = "SELECT DISTINCT $column FROM recipe WHERE $column IS NOT NULL AND $column != ''"
 
         try {
-            // DB 연결 및 쿼리 실행
             DriverManager.getConnection(URL, USER, PASSWORD).use { conn ->
                 conn.prepareStatement(query).use { stmt ->
                     stmt.executeQuery().use { rs ->
                         while (rs.next()) {
-                            result.add(rs.getString(1)) // 첫 번째 컬럼값 추가
+                            result.add(rs.getString(1))
                         }
                     }
                 }
@@ -59,15 +55,7 @@ object MySQLHelper {
         return result
     }
 
-    /**
-     * 카테고리(종류/상황/방법)와 식재료 리스트를 기반으로 필터링된 레시피명 리스트 반환
-     *
-     * @param kind 종류 조건 (nullable)
-     * @param situation 상황 조건 (nullable)
-     * @param method 조리 방법 조건 (nullable)
-     * @param ingredients 사용자가 선택한 식재료들
-     * @return 조건을 모두 만족하는 레시피 이름 리스트
-     */
+    // 2. 조건에 따라 레시피 필터링
     fun getFilteredRecipes(
         kind: String?, situation: String?, method: String?, ingredients: List<String>
     ): List<RecipeItem> {
@@ -105,13 +93,13 @@ object MySQLHelper {
 
         val rs = pstmt.executeQuery()
         while (rs.next()) {
-            val recipeNo = rs.getInt("recipe_no")               // db변경으로 recipe_no가져오기
+            val recipeNo = rs.getInt("recipe_no")
             val name = rs.getString("CKG_NM")
             val dbIngredients = rs.getString("CKG_MTRL_CN")
 
             val isMatch = ingredients.all { dbIngredients.contains(it) }
             if (isMatch) {
-                result.add(RecipeItem(recipeNo, name))           // RecipeItem으로 저장
+                result.add(RecipeItem(recipeNo, name))
             }
         }
 
@@ -121,8 +109,7 @@ object MySQLHelper {
         return result
     }
 
-
-    // 레시피 이미지 가져오기
+    // 3. 이미지 URL만 가져오기 (이전 방식 그대로 유지)
     fun getRecipeImageUrl(recipeName: String): String? {
         var imageUrl: String? = null
         val query = "SELECT RCP_IMG_URL FROM recipe WHERE CKG_NM = ?"
@@ -143,5 +130,30 @@ object MySQLHelper {
         }
 
         return imageUrl
+    }
+
+    // 4. 레시피 번호로 제목(RCP_TTL)과 이미지 URL을 가져오는 함수 (크롤링용)
+    fun getRecipeByNo(recipeNo: Int): RecipeData? {
+        var result: RecipeData? = null
+        val query = "SELECT RCP_TTL, RCP_IMG_URL FROM recipe WHERE recipe_no = ?"
+
+        try {
+            DriverManager.getConnection(URL, USER, PASSWORD).use { conn ->
+                conn.prepareStatement(query).use { stmt ->
+                    stmt.setInt(1, recipeNo)
+                    stmt.executeQuery().use { rs ->
+                        if (rs.next()) {
+                            val title = rs.getString("RCP_TTL")
+                            val imgUrl = rs.getString("RCP_IMG_URL")
+                            result = RecipeData(title, imgUrl)
+                        }
+                    }
+                }
+            }
+        } catch (e: SQLException) {
+            Log.e("MySQL", "❌ 레시피 제목 및 이미지 조회 실패: ${e.message}")
+        }
+
+        return result
     }
 }

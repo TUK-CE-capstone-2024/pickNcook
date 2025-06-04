@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.pickandcook.api.RetrofitClient
+import com.example.pickandcook.api.SavedRecipeResponse
 import com.example.pickandcook.databinding.FragmentSavedRecipeBinding
 import retrofit2.Call
 import retrofit2.Callback
@@ -34,7 +35,6 @@ class SavedRecipeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         loadSavedRecipes()
     }
 
@@ -48,16 +48,21 @@ class SavedRecipeFragment : Fragment() {
         }
 
         RetrofitClient.instance.getSavedRecipes(userId)
-            .enqueue(object : Callback<List<String>> {
-                override fun onResponse(call: Call<List<String>>, response: Response<List<String>>) {
-                    if (response.isSuccessful) {
-                        val recipes = response.body() ?: emptyList()
-
+            .enqueue(object : Callback<List<SavedRecipeResponse>> {
+                override fun onResponse(
+                    call: Call<List<SavedRecipeResponse>>,
+                    response: Response<List<SavedRecipeResponse>>
+                ) {
+                    if (response.isSuccessful && response.body() != null) {
+                        val savedList = response.body()!!
                         binding.recipeContainer.removeAllViews()
 
-                        for (recipeName in recipes) {
+                        for (item in savedList) {
+                            val recipeTitle = item.ckgNm
+                            val recipeNo = item.recipeNo
+
                             val textView = TextView(requireContext()).apply {
-                                text = recipeName
+                                text = recipeTitle
                                 textSize = 18f
                                 setTypeface(null, Typeface.BOLD)
                                 setTextColor(Color.BLACK)
@@ -70,22 +75,23 @@ class SavedRecipeFragment : Fragment() {
                                     setMargins(12, 20, 12, 20)
                                 }
                                 gravity = android.view.Gravity.CENTER
-
                                 setOnClickListener {
                                     val intent = Intent(requireContext(), RecipeDetailActivity::class.java)
-                                    intent.putExtra("recipeName", recipeName) // 레시피 이름 넘기기
+                                    intent.putExtra("recipeNo", recipeNo)  //  recipeNo 전달
                                     startActivity(intent)
                                 }
                             }
+
+
                             binding.recipeContainer.addView(textView)
                         }
                     } else {
-                        Toast.makeText(requireContext(), "불러오기 실패", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "레시피 불러오기 실패", Toast.LENGTH_SHORT).show()
                     }
                 }
 
-                override fun onFailure(call: Call<List<String>>, t: Throwable) {
-                    Toast.makeText(requireContext(), "오류: ${t.message}", Toast.LENGTH_SHORT).show()
+                override fun onFailure(call: Call<List<SavedRecipeResponse>>, t: Throwable) {
+                    Toast.makeText(requireContext(), "네트워크 오류", Toast.LENGTH_SHORT).show()
                 }
             })
     }

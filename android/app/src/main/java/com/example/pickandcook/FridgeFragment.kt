@@ -65,7 +65,7 @@ class FridgeFragment : Fragment() {
             try {
                 val client = OkHttpClient()
                 val request = Request.Builder()
-                    .url("http://172.30.1.98:5000/get-server-ip")
+                    .url("http://192.168.235.243:5000/get-server-ip")
                     .build()
 
                 val response = client.newCall(request).execute()

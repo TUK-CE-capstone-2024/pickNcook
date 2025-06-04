@@ -77,7 +77,8 @@ class CategoryFragment : Fragment() {
             }
 
             parentFragmentManager.commit {
-                replace(R.id.mainFragmentContainer, RecipeRecommendationFragment().apply { arguments = bundle })
+                hide(this@CategoryFragment)
+                add(R.id.mainFragmentContainer, RecipeRecommendationFragment().apply { arguments = bundle })
                 addToBackStack(null)
             }
         }
