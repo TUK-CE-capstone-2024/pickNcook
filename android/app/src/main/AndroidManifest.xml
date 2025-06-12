@@ -23,17 +23,9 @@
             android:name=".RecipeDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".RecipeResultActivity"
-            android:exported="false" />
-        <activity
-            android:name=".CategoryActivity"
-            android:exported="false" />
-        <activity
-            android:name=".SelectIngredientActivity"
-            android:exported="false" />
-        <activity
             android:name=".MainActivity"
             android:exported="true">
+
         </activity>
         <activity
             android:name=".LoginActivity"
@@ -50,11 +42,7 @@
         <activity
             android:name=".InitialActivity"
             android:exported="true">
-
         </activity>
-        <activity
-            android:name=".RecipeRecommendation"
-            android:exported="true"/>
     </application>
 
 </manifest>

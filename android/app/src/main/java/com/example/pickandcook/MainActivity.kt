@@ -1,10 +1,6 @@
 package com.example.pickandcook
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -29,17 +25,25 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupBottomNavigation() {
         binding.menuNavi.setOnItemSelectedListener { item ->
-            val selectedFragment = when (item.itemId) {
-                R.id.navi_recipe -> SavedRecipeFragment()
-                R.id.navi_home -> HomeFragment()
-                R.id.navi_myinfo -> MyinfoFragment()
-                else -> null
+            when (item.itemId) {
+                R.id.navi_recipe -> {
+                    setFragment(SavedRecipeFragment())
+                    true
+                }
+                R.id.navi_home -> {
+                    setFragment(HomeFragment())
+                    true
+                }
+                R.id.navi_myinfo -> {
+                    val fragment = MyinfoFragment()
+                    fragment.show(supportFragmentManager, fragment.tag)
+                    true
+                }
+                else -> false
             }
-
-            selectedFragment?.let { setFragment(it) }
-            selectedFragment != null
         }
     }
+
     // Fragment 전환
     private fun setFragment(fragment: Fragment) {
         // 백스택 초기화
