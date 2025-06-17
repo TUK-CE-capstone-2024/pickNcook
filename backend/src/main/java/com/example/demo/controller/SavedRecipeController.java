@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Recipe;
 import com.example.demo.model.RecipeStorage;
+import com.example.demo.model.SavedRecipeDTO;
 import com.example.demo.repository.RecipeRepository;
 import com.example.demo.repository.RecipeStorageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,15 +22,18 @@ public class SavedRecipeController {
     private RecipeRepository recipeRepository;
 
     @GetMapping("/{userId}")
-    public List<String> getSavedRecipes(@PathVariable("userId") String userId) {
+    public List<SavedRecipeDTO> getSavedRecipes(@PathVariable("userId") String userId) {
         List<RecipeStorage> savedList = recipeStorageRepository.findByUserId(userId);
 
         return savedList.stream()
-                .map(storage -> {
-                    Recipe recipe = recipeRepository.findById(storage.getRecipeNo()).orElse(null);
-                    return recipe != null ? recipe.getCkgNm() : null;
-                })
-                .filter(name -> name != null)
-                .collect(Collectors.toList());
+            .map(storage -> {
+                Recipe recipe = recipeRepository.findById(storage.getRecipeNo()).orElse(null);
+                if (recipe != null) {
+                    return new SavedRecipeDTO(recipe.getRecipeNo(), recipe.getCkgNm());
+                }
+                return null;
+            })
+            .filter(dto -> dto != null)
+            .collect(Collectors.toList());
     }
 }

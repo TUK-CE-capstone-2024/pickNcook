@@ -5,7 +5,7 @@ public class FridgeDTO {
     private String userId;
     private String fridgeIngredient;
 
-    // photo는 일단 DTO에는 넣지 말자 (불러오기 힘드니까)
+    
 
     // Getter/Setter
     public Integer getFridgeIngredientNo() {

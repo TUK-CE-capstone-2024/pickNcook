@@ -31,5 +31,15 @@ public class FridgeController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/photo")
+    public ResponseEntity<String> getFridgePhoto(
+        @RequestParam("userId") String userId,
+        @RequestParam("ingredientName") String ingredientName
+    ) {
+        // Optional<String>이 비어 있어도 200 OK로 응답, body는 ""로
+        String base64 = fridgeService.getPhotoAsBase64(userId, ingredientName).orElse("");
+        return ResponseEntity.ok(base64);
+    }
+
 
 }

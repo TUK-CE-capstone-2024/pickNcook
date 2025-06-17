@@ -23,4 +23,28 @@ public class RecipeStorageController {
         response.put("message", "레시피 저장 성공");
         return ResponseEntity.ok(response);
     }
+    
+    
+    @GetMapping("/exists")
+    public ResponseEntity<Boolean> isRecipeSaved(
+            @RequestParam("userId") String userId,
+            @RequestParam("recipeNo") int recipeNo) {
+
+        boolean exists = recipeStorageService.isRecipeSaved(userId, recipeNo);
+        return ResponseEntity.ok(exists);
+    }
+    
+    @DeleteMapping("/{userId}/{recipeNo}")
+    public ResponseEntity<Void> deleteRecipeStorage(
+        @PathVariable("userId") String userId,
+        @PathVariable("recipeNo") int recipeNo
+    ) {
+        System.out.println("userId=" + userId + ", recipeNo=" + recipeNo);
+        recipeStorageService.deleteRecipe(userId, recipeNo);
+        return ResponseEntity.ok().build();
+    }
+
+
+
+
 }

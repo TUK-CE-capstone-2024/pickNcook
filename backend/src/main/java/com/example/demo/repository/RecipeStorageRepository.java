@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface RecipeStorageRepository extends JpaRepository<RecipeStorage, Integer> {
     List<RecipeStorage> findByUserId(String userId); 
+    void deleteByUserIdAndRecipeNo(String userId, int recipeNo);
 }
