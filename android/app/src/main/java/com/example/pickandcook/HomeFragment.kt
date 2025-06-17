@@ -51,15 +51,11 @@ class HomeFragment : Fragment() {
         }
 
         binding.notificationIcon.setOnClickListener {
-            val fragment = NotificationFragment()
-
             parentFragmentManager.beginTransaction()
-                .replace(R.id.mainFragmentContainer, fragment)
+                .replace(R.id.mainFragmentContainer, NotificationFragment())
                 .addToBackStack(null)
                 .commit()
-
         }
-
 
 
     }

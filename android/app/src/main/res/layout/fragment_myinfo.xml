@@ -1,19 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/myinfoContainer"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@drawable/bg_rounded_top"
+    android:backgroundTint="@color/white">
 
+    <!-- 상단 헤더 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="내정보"
+            android:textAppearance="@style/TitleTextStyle"
+            android:textSize="@dimen/title2_text_size"
+            android:layout_centerHorizontal="true" />
+
+        <ImageView
+            android:id="@+id/closeBtn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_close" />
+    </RelativeLayout>
+
+    <!-- 구분선 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="30dp"
+        android:background="#DDDDDD" />
+
+    <!-- 사용자 정보 (아이콘 + 이름) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/userIcon"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_user"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/userName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="홍길동"
+            android:textSize="@dimen/title1_text_size"
+            android:textStyle="bold"
+            android:layout_marginStart="10dp"/>
+    </LinearLayout>
+
+    <!-- 두 번째 구분선 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="20dp"
+        android:background="#DDDDDD" />
+
+    <!-- 선호식품 버튼 -->
+    <Button
+        android:id="@+id/preferFoodBtn"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="선호 식품"
+        android:textSize="@dimen/button_size"
+        android:backgroundTint="@color/main"
+        android:textColor="@color/black" />
+
+    <!-- 쇼핑리스트 버튼 -->
     <Button
         android:id="@+id/shoppingListBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="쇼핑 리스트"/>
-
-
-    <Button
-        android:id="@+id/btnFavoriteFoods"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="선호식품 보기" />
-
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="쇼핑 리스트"
+        android:textSize="@dimen/button_size"
+        android:layout_marginTop="15dp"
+        android:backgroundTint="@color/main"
+        android:textColor="@color/black" />
 </LinearLayout>
