@@ -119,8 +119,11 @@ class FridgeFragment : Fragment() {
                             .replace(R.id.mainFragmentContainer, fragment)
                             .addToBackStack(null)
                             .commit()
-                    }, enableSelection = false)
-
+                    },
+                        onDeleteClick = null, // 삭제 기능 없음
+                        showDeleteButton = false, // X 아이콘 숨김
+                        enableSelection = false // 선택 기능 OFF
+                    )
                     binding.recyclerView.adapter = adapter
 
                 } else {

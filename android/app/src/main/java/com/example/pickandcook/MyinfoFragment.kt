@@ -47,13 +47,13 @@ class MyinfoFragment : BottomSheetDialogFragment() {
             dismiss()
         }
 
-//        binding.preferFoodBtn.setOnClickListener {
-//            parentFragmentManager.beginTransaction()
-//                .replace(R.id.mainFragmentContainer, PreferFoodFragment())
-//                .addToBackStack(null)
-//                .commit()
-//            dismiss()
-//        }
+        binding.preferFoodBtn.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.mainFragmentContainer, PreferFoodFragment())
+                .addToBackStack(null)
+                .commit()
+            dismiss()
+        }
 
         binding.shoppingListBtn.setOnClickListener {
             parentFragmentManager.beginTransaction()

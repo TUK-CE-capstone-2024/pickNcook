@@ -2,17 +2,13 @@ package com.example.pickandcook
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
 import com.example.pickandcook.api.RetrofitClient
 import com.example.pickandcook.api.SavedRecipeResponse
 import com.example.pickandcook.databinding.FragmentSavedRecipeBinding
@@ -39,6 +35,22 @@ class SavedRecipeFragment : Fragment() {
     }
 
     private fun loadSavedRecipes() {
+//        // 테스트용 하드코딩 데이터
+//        val testList = listOf(
+//            SavedRecipeResponse(recipeNo = 1, ckgNm = "된장찌개"),
+//            SavedRecipeResponse(recipeNo = 2, ckgNm = "김치볶음밥"),
+//            SavedRecipeResponse(recipeNo = 3, ckgNm = "계란말이"),
+//            SavedRecipeResponse(recipeNo = 4, ckgNm = "떡볶이")
+//        )
+//
+//        val adapter = SavedRecipeAdapter(testList) { item: SavedRecipeResponse ->
+//            val intent = Intent(requireContext(), RecipeDetailActivity::class.java)
+//            intent.putExtra("recipeNo", item.recipeNo)
+//            startActivity(intent)
+//        }
+//
+//        binding.recipeRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
+//        binding.recipeRecyclerView.adapter = adapter
         val sharedPref = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
         val userId = sharedPref.getString("userId", null)
 
@@ -55,36 +67,15 @@ class SavedRecipeFragment : Fragment() {
                 ) {
                     if (response.isSuccessful && response.body() != null) {
                         val savedList = response.body()!!
-                        binding.recipeContainer.removeAllViews()
 
-                        for (item in savedList) {
-                            val recipeTitle = item.ckgNm
-                            val recipeNo = item.recipeNo
-
-                            val textView = TextView(requireContext()).apply {
-                                text = recipeTitle
-                                textSize = 18f
-                                setTypeface(null, Typeface.BOLD)
-                                setTextColor(Color.BLACK)
-                                setPadding(40, 60, 40, 60)
-                                background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_rounded)
-                                layoutParams = LinearLayout.LayoutParams(
-                                    ViewGroup.LayoutParams.MATCH_PARENT,
-                                    ViewGroup.LayoutParams.WRAP_CONTENT
-                                ).apply {
-                                    setMargins(12, 20, 12, 20)
-                                }
-                                gravity = android.view.Gravity.CENTER
-                                setOnClickListener {
-                                    val intent = Intent(requireContext(), RecipeDetailActivity::class.java)
-                                    intent.putExtra("recipeNo", recipeNo)  //  recipeNo 전달
-                                    startActivity(intent)
-                                }
-                            }
-
-
-                            binding.recipeContainer.addView(textView)
+                        val adapter = SavedRecipeAdapter(savedList) { item: SavedRecipeResponse  ->
+                            val intent = Intent(requireContext(), RecipeDetailActivity::class.java)
+                            intent.putExtra("recipeNo", item.recipeNo)
+                            startActivity(intent)
                         }
+
+                        binding.recipeRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
+                        binding.recipeRecyclerView.adapter = adapter
                     } else {
                         Toast.makeText(requireContext(), "레시피 불러오기 실패", Toast.LENGTH_SHORT).show()
                     }

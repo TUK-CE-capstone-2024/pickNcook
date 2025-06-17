@@ -1,33 +1,49 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/foodItemContainer"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:layout_margin="8dp"
-    android:background="@drawable/item_background_selector"
-    android:padding="@dimen/food_item_padding">
+    android:layout_margin="8dp">
 
-    <!-- 식재료 이미지 -->
-    <ImageView
-        android:id="@+id/foodImage"
-        android:layout_width="55dp"
-        android:layout_height="55dp"
-        android:layout_weight="1"
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_placeholder" />
-
-    <!-- 식재료 이름 -->
-    <TextView
-        android:id="@+id/foodName"
-        android:layout_width="wrap_content"
+    <!-- 전체 카드 내용 -->
+    <LinearLayout
+        android:id="@+id/foodItemContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minWidth="50dp"
-        android:text="식재료"
-        android:textSize="@dimen/food_text_size"
-        android:maxLines="1"
-        android:layout_marginTop="10dp"
-        android:gravity="center"/>
-</LinearLayout>
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="@drawable/item_background_selector"
+        android:padding="@dimen/food_item_padding">
+
+        <!-- 식재료 이미지 -->
+        <ImageView
+            android:id="@+id/foodImage"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_placeholder" />
+
+        <!-- 식재료 이름 -->
+        <TextView
+            android:id="@+id/foodName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="50dp"
+            android:text="식재료"
+            android:textSize="@dimen/food_text_size"
+            android:maxLines="1"
+            android:layout_marginTop="10dp"
+            android:gravity="center"/>
+    </LinearLayout>
+
+    <!-- 삭제 버튼: 전체 카드 기준 오른쪽 위에 고정 -->
+    <ImageView
+        android:id="@+id/btnDelete"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="4dp"
+        android:src="@drawable/ic_close"
+        android:padding="4dp"
+        android:contentDescription="삭제"
+        android:visibility="gone"/>
+</FrameLayout>

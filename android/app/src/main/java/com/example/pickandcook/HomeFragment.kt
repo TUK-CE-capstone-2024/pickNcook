@@ -49,6 +49,13 @@ class HomeFragment : Fragment() {
                 .commit()
         }
 
+        binding.notificationIcon.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.mainFragmentContainer, NotificationFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
 
     }
 
