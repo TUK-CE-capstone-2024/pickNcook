@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.pickandcook.databinding.FragmentHomeBinding
+import com.example.pickandcook.ui.notification.NotificationFragment
 
 class HomeFragment : Fragment() {
 
@@ -48,6 +49,17 @@ class HomeFragment : Fragment() {
                 .addToBackStack(null)
                 .commit()
         }
+
+        binding.notificationIcon.setOnClickListener {
+            val fragment = NotificationFragment()
+
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.mainFragmentContainer, fragment)
+                .addToBackStack(null)
+                .commit()
+
+        }
+
 
 
     }

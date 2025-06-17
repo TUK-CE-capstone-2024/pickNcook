@@ -8,7 +8,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
-import kotlin.concurrent.thread
+import com.example.pickandcook.api.RecipeItem
+import com.example.pickandcook.api.RetrofitClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RecipeRecommendationFragment : Fragment() {
 
@@ -16,7 +21,6 @@ class RecipeRecommendationFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // 별도 XML 없이 빈 View 리턴
         return View(requireContext())
     }
 
@@ -28,46 +32,58 @@ class RecipeRecommendationFragment : Fragment() {
         val selectedCartItems = IngredientStore.selectedShoppingItems.map { it.name }
         val selectedIngredients = selectedFridgeItems + selectedCartItems
 
-        val selectedKind = arguments?.getString("category_kind")
-        val selectedSituation = arguments?.getString("category_situation")
-        val selectedMethod = arguments?.getString("category_method")
+        val selectedKind = arguments?.getString("category_kind") ?: ""
+        val selectedSituation = arguments?.getString("category_situation") ?: ""
+        val selectedMethod = arguments?.getString("category_method") ?: ""
 
         Log.d("RECOMMEND", "✅ 냉장고 식재료: $selectedFridgeItems")
         Log.d("RECOMMEND", "✅ 쇼핑카트 식재료: $selectedCartItems")
         Log.d("RECOMMEND", "✅ 전체 사용 식재료: $selectedIngredients")
         Log.d("RECOMMEND", "✅ 선택된 카테고리 - 종류: $selectedKind, 상황: $selectedSituation, 방법: $selectedMethod")
 
-        if (selectedIngredients.isEmpty() && selectedKind == null && selectedSituation == null && selectedMethod == null) {
+        if (selectedIngredients.isEmpty() && selectedKind.isEmpty() && selectedSituation.isEmpty() && selectedMethod.isEmpty()) {
             Toast.makeText(requireContext(), "선택된 조건이 없습니다.", Toast.LENGTH_SHORT).show()
             parentFragmentManager.popBackStack()
             return
         }
 
-        thread {
-            val recipeList = MySQLHelper.getFilteredRecipes(
-                selectedKind, selectedSituation, selectedMethod, selectedIngredients
-            )
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitClient.instance.filterRecipes(
+                    selectedKind, selectedSituation, selectedMethod, selectedIngredients
+                ).execute()
 
-            Log.d("RECOMMEND", "✅ 필터링된 레시피 수: ${recipeList.size}")
-            Log.d("RECOMMEND", "✅ 추천 레시피: $recipeList")
+                val recipeList = response.body() ?: emptyList()
 
-            requireActivity().runOnUiThread {
-                if (recipeList.isEmpty()) {
-                    Toast.makeText(requireContext(), "조건에 맞는 레시피가 없습니다.", Toast.LENGTH_SHORT).show()
-                    parentFragmentManager.popBackStack()
-                    return@runOnUiThread
-                }
+                withContext(Dispatchers.Main) {
+                    if (recipeList.isEmpty()) {
+                        Toast.makeText(requireContext(), "조건에 맞는 레시피가 없습니다.", Toast.LENGTH_SHORT).show()
+                        parentFragmentManager.popBackStack()
+                        return@withContext
+                    }
 
-                val fragment = RecipeResultFragment().apply {
-                    arguments = Bundle().apply {
-                        putParcelableArrayList("recipes", ArrayList(recipeList))
+                    val recipeItemList = recipeList.map {
+                        RecipeItem(recipeNo = it.recipeNo, recipeName = it.rcpTtl)
+                    }
+
+                    val fragment = RecipeResultFragment().apply {
+                        arguments = Bundle().apply {
+                            putParcelableArrayList("recipes", ArrayList(recipeItemList))
+                        }
+                    }
+
+
+                    parentFragmentManager.commit {
+                        hide(this@RecipeRecommendationFragment)
+                        add(R.id.mainFragmentContainer, fragment)
+                        addToBackStack(null)
                     }
                 }
-
-                parentFragmentManager.commit {
-                    hide(this@RecipeRecommendationFragment)
-                    add(R.id.mainFragmentContainer, fragment)
-                    addToBackStack(null)
+            } catch (e: Exception) {
+                Log.e("RECOMMEND", "API 호출 실패: ${e.message}")
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "서버 오류 발생", Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.popBackStack()
                 }
             }
         }

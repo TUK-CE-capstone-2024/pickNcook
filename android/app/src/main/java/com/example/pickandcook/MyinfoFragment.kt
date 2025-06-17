@@ -22,6 +22,7 @@ class MyinfoFragment : Fragment() {
 
         // xml에 있는 버튼 ID로 뷰 가져오기
         val shoppingListBtn = view.findViewById<Button>(R.id.shoppingListBtn)
+        val favoriteFoodsBtn = view.findViewById<Button>(R.id.btnFavoriteFoods)
 
         // 버튼 클릭 시 쇼핑리스트 Fragment로 전환
         shoppingListBtn.setOnClickListener {
@@ -30,5 +31,20 @@ class MyinfoFragment : Fragment() {
                 .addToBackStack(null)  // 뒤로가기 가능하도록 스택에 추가
                 .commit()
         }
+
+
+        /*
+        // 선호식품 목록 조회
+        favoriteFoodsBtn.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.mainFragmentContainer, FavoriteFoodsFragment())
+                .addToBackStack(null)
+                .commit()
+        }
+
+         */
+
+
+
     }
 }

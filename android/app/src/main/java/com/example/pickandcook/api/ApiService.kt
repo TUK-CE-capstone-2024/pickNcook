@@ -5,6 +5,8 @@ import retrofit2.Call
 import retrofit2.http.*
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import okhttp3.ResponseBody
+import retrofit2.Response
 
 data class User(
     val id: String,
@@ -36,6 +38,7 @@ data class FridgeItem(
     val fridgeIngredient: String,
     val imageResId: Int
 )
+
 
 // 장바구니 추가 요청 DTO
 data class CartRequest(
@@ -76,6 +79,51 @@ data class SavedRecipeResponse(
     val recipeNo: Int,
     val ckgNm: String
 )
+
+data class FavoriteRequest(
+    val userId: String,
+    val preferIngredient: String
+)
+data class Notification(
+    val notificationNo: Int,
+    val userId: String,
+    val notificationMsg: String,
+    val regDate: String
+)
+
+data class RemovedFavoriteCheckRequest(
+    val userId: String,
+    val previousFridgeItems: List<String>
+)
+
+@Parcelize
+data class Recipe(
+    val recipeNo: Int,
+    val rcpTtl: String,
+    val ckgMtrlCn: String,
+    val rcpImgUrl: String
+): Parcelable
+
+data class PreferIngredient(
+    val preferIngredientNo: Int,
+    val userId: String,
+    val preferIngredient: String
+)
+
+
+data class RecipeDetailResponse(
+    val recipeNo: Int,
+    val rcpImgUrl: String,
+    val ckgNm: String,
+    val ckgInbunNm: String,
+    val ckgDodfNm: String,
+    val ckgTimeNm: String,
+    val ckgKndActoNm: String,
+    val ckgStaActoNm: String,
+    val ckgMthActoNm: String
+)
+
+
 
 interface ApiService {
     @POST("/main/register")
@@ -145,6 +193,98 @@ interface ApiService {
     //fun getSavedRecipes(@Path("userId") userId: String): Call<List<String>>
     @GET("/api/recipe-storage/{userId}")
     fun getSavedRecipes(@Path("userId") userId: String): Call<List<SavedRecipeResponse>>
+
+
+    @GET("api/recipe-storage/exists")
+    fun isRecipeSaved(
+        @Query("userId") userId: String,
+        @Query("recipeNo") recipeNo: Int
+    ): Call<Boolean>
+
+    @DELETE("api/recipe-storage/{userId}/{recipeNo}")
+    fun deleteRecipe(
+        @Path("userId") userId: String,
+        @Path("recipeNo") recipeNo: Int
+    ): Call<Void>
+
+
+
+
+    @POST("/api/prefer-ingredient/add")
+    fun addFavorite(@Body request: FavoriteRequest): Call<Map<String, String>>
+
+    @DELETE("/api/prefer-ingredient/delete")
+    fun deleteFavorite(
+        @Query("userId") userId: String,
+        @Query("ingredient") ingredient: String
+    ): Call<Map<String, String>>
+
+    @GET("/api/prefer-ingredient/exists")
+    suspend fun isFavorite(
+        @Query("userId") userId: String,
+        @Query("ingredient") ingredient: String
+    ): Response<Boolean>
+
+    @GET("/api/prefer-ingredient/all")
+    fun getPreferIngredients(
+        @Query("userId") userId: String
+    ): Call<List<PreferIngredient>>
+
+
+
+    @GET("/api/notifications/{userId}")
+    fun getUserNotifications(@Path("userId") userId: String): Call<List<Notification>>
+
+    @DELETE("/api/notifications/{notificationNo}")
+    fun deleteNotification(@Path("notificationNo") notificationNo: Int): Call<Void>
+
+
+
+    @POST("/api/notifications/check-removed-favorites")
+    fun checkRemovedFavorites(@Body request: RemovedFavoriteCheckRequest): Call<Void>
+
+
+
+    @GET("/api/recipes/detail/{recipeNo}")
+    fun getRecipeEntity(@Path("recipeNo") recipeNo: Int): Call<Recipe>
+
+
+
+
+    @GET("/api/recipes/info/{recipeNo}")
+    fun getRecipeDetail(@Path("recipeNo") recipeNo: Int): Call<RecipeDetailResponse>
+
+
+
+
+    @GET("/api/recipes")
+    fun getAllRecipes(): Call<List<Recipe>>
+
+    @GET("/api/recipes/filter")
+    fun filterRecipes(
+        @Query("kind") kind: String,
+        @Query("situation") situation: String,
+        @Query("method") method: String,
+        @Query("ingredients") ingredients: List<String>
+    ): Call<List<Recipe>>
+
+    @GET("/api/recipes/categories/{column}")
+    fun getCategoryValues(@Path("column") column: String): Call<List<String>>
+
+    @GET("/api/recipes/image-url")
+    fun getImageUrl(@Query("name") name: String): Call<String>
+
+    @GET("/api/recipes/{recipeNo}")
+    fun getRecipeByNo(@Path("recipeNo") recipeNo: Int): Call<Recipe>
+
+
+    @GET("/api/fridge/photo")
+    fun getFridgePhoto(
+        @Query("userId") userId: String,
+        @Query("ingredientName") ingredientName: String
+    ): Call<ResponseBody>
+
+
 
 
 }

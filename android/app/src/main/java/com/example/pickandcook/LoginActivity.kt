@@ -3,6 +3,7 @@ package com.example.pickandcook
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.pickandcook.api.LoginResponse
@@ -38,6 +39,8 @@ class LoginActivity : AppCompatActivity() {
                             val loginResponse = response.body()
                             val userId = loginResponse?.userId
                             val userName = loginResponse?.userName
+
+
 
                             if (userId != null && userName != null) {
                                 val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)

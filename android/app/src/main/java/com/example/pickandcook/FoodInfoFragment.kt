@@ -1,14 +1,23 @@
 package com.example.pickandcook
 
+import android.content.Context
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.util.Log
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity.MODE_PRIVATE
 import androidx.fragment.app.Fragment
 import com.example.pickandcook.databinding.FragmentFoodInfoBinding
 import com.example.pickandcook.api.* // ChatGPT API 의존성
 import kotlinx.coroutines.*
+import retrofit2.*
+import android.util.Base64
+import androidx.appcompat.app.AlertDialog
+
 
 class FoodInfoFragment : Fragment() {
 
@@ -30,6 +39,9 @@ class FoodInfoFragment : Fragment() {
 
         val name = arguments?.getString("name") ?: ""
         val imageResId = arguments?.getInt("imageResId") ?: R.drawable.ic_placeholder
+        val userId = getUserIdFromSharedPrefs()
+        checkFavoriteStatus(userId, name)
+
 
         binding.foodName.text = name
         binding.foodImage.setImageResource(imageResId)
@@ -37,6 +49,8 @@ class FoodInfoFragment : Fragment() {
         // 식재료 정보를 GPT API로 가져와서 표시 (달라진 부분 -> 식재료 정보들도 가져와야함)
         fetchIngredientInfo(name)
 
+
+        /*
         // 하트 클릭 시 선호식품 표시
         binding.btnFavorite.setOnClickListener {
             isFavorite = !isFavorite
@@ -45,6 +59,91 @@ class FoodInfoFragment : Fragment() {
                 else R.drawable.ic_heart_black
             )
         }
+         */
+
+        binding.btnFavorite.setOnClickListener {
+            if (isFavorite) {
+                // 삭제 요청
+                RetrofitClient.instance.deleteFavorite(userId, name)
+                    .enqueue(object : Callback<Map<String, String>> {
+                        override fun onResponse(call: Call<Map<String, String>>, response: Response<Map<String, String>>) {
+                            if (response.isSuccessful) {
+                                isFavorite = false
+                                binding.btnFavorite.setImageResource(R.drawable.ic_heart_black)
+                            }
+                        }
+
+                        override fun onFailure(call: Call<Map<String, String>>, t: Throwable) {
+                            Log.e("FoodInfoFragment", "즐겨찾기 삭제 실패", t)
+                        }
+                    })
+            } else {
+                // 추가 요청
+                val request = FavoriteRequest(userId, name)
+                RetrofitClient.instance.addFavorite(request)
+                    .enqueue(object : Callback<Map<String, String>> {
+                        override fun onResponse(call: Call<Map<String, String>>, response: Response<Map<String, String>>) {
+                            if (response.isSuccessful) {
+                                isFavorite = true
+                                binding.btnFavorite.setImageResource(R.drawable.ic_heart_red)
+                            }
+                        }
+
+                        override fun onFailure(call: Call<Map<String, String>>, t: Throwable) {
+                            Log.e("FoodInfoFragment", "즐겨찾기 추가 실패", t)
+                        }
+                    })
+            }
+        }
+
+        binding.btnIngredientState.setOnClickListener {
+            val userId = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+                .getString("userId", null) ?: return@setOnClickListener
+            val ingredientName = binding.foodName.text.toString()
+
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val response = RetrofitClient.instance.getFridgePhoto(userId, ingredientName).execute()
+                    if (response.isSuccessful) {
+                        val base64 = response.body()?.string()
+                        if (!base64.isNullOrEmpty()) {
+                            val imageBytes = Base64.decode(base64, Base64.DEFAULT)
+                            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+
+                            withContext(Dispatchers.Main) {
+                                AlertDialog.Builder(requireContext())
+                                    .setTitle("내 재료 상태 보기")
+                                    .setView(ImageView(requireContext()).apply {
+                                        setImageBitmap(bitmap)
+                                        layoutParams = ViewGroup.LayoutParams(
+                                            ViewGroup.LayoutParams.MATCH_PARENT,
+                                            ViewGroup.LayoutParams.WRAP_CONTENT
+                                        )
+                                    })
+                                    .setPositiveButton("확인", null)
+                                    .show()
+                            }
+                        } else {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(requireContext(), "이미지가 없습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(requireContext(), "서버 응답 오류: ${response.code()}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("FOOD_IMAGE", "이미지 불러오기 실패: ${e.message}")
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(requireContext(), "오류 발생: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+
+
+
 
         // 닫기 버튼
         binding.btnClose.setOnClickListener {
@@ -150,6 +249,30 @@ class FoodInfoFragment : Fragment() {
         binding.foodNutrition.text = nutrition ?: "영양 정보 없음"
         binding.foodEffect.text = effect ?: "효능 정보 없음"
         binding.foodStorage.text = storage ?: "보관 방법 없음"
+    }
+
+    private fun checkFavoriteStatus(userId: String, ingredientName: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitClient.instance.isFavorite(userId, ingredientName)
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful && response.body() == true) {
+                        isFavorite = true
+                        binding.btnFavorite.setImageResource(R.drawable.ic_heart_red)
+                    } else {
+                        isFavorite = false
+                        binding.btnFavorite.setImageResource(R.drawable.ic_heart_black)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("FoodInfoFragment", "즐겨찾기 상태 확인 실패", e)
+            }
+        }
+    }
+
+    private fun getUserIdFromSharedPrefs(): String {
+        val sharedPref = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        return sharedPref.getString("userId", "") ?: ""
     }
 
 }

@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.pickandcook.api.FridgeItem
+import com.example.pickandcook.api.RemovedFavoriteCheckRequest
 import com.example.pickandcook.api.RetrofitClient
 import com.example.pickandcook.databinding.FragmentFridgeBinding
 import kotlinx.coroutines.CoroutineScope
@@ -30,6 +31,8 @@ class FridgeFragment : Fragment() {
 
     private lateinit var adapter: FoodAdapter
     private var serverIpAddress: String? = null
+
+    private var previousFridgeItems: List<String> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,7 +58,54 @@ class FridgeFragment : Fragment() {
 
         binding.addButton.setOnClickListener {
             runYoloAndRefresh()
+
+            /*
+            val sharedPref = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+            val userId = sharedPref.getString("userId", null)
+
+            if (userId != null && previousFridgeItems.isNotEmpty()) {
+                val request = RemovedFavoriteCheckRequest(userId, previousFridgeItems)
+                RetrofitClient.instance.checkRemovedFavorites(request).enqueue(object : Callback<Void> {
+                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                        if (response.isSuccessful) {
+                            Log.d("FridgeFragment", "Removed favorites checked.")
+                        } else {
+                            Log.e("FridgeFragment", "알림 API 실패")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                        Log.e("FridgeFragment", "알림 API 오류: ${t.message}")
+                    }
+                })
+            }
+
+             */
         }
+
+        binding.asd.setOnClickListener{
+            val sharedPref = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+            val userId = sharedPref.getString("userId", null)
+
+            if (userId != null && previousFridgeItems.isNotEmpty()) {
+                val request = RemovedFavoriteCheckRequest(userId, previousFridgeItems)
+                RetrofitClient.instance.checkRemovedFavorites(request).enqueue(object : Callback<Void> {
+                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                        if (response.isSuccessful) {
+                            Log.d("FridgeFragment", "Removed favorites checked.")
+                        } else {
+                            Log.e("FridgeFragment", "알림 API 실패")
+                        }
+                    }
+
+                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                        Log.e("FridgeFragment", "알림 API 오류: ${t.message}")
+                    }
+                })
+            }
+
+        }
+
 
         fetchFridgeItems()
     }
@@ -65,7 +115,7 @@ class FridgeFragment : Fragment() {
             try {
                 val client = OkHttpClient()
                 val request = Request.Builder()
-                    .url("http://192.168.235.243:5000/get-server-ip")
+                    .url("http://192.168.25.132:5000/get-server-ip")
                     .build()
 
                 val response = client.newCall(request).execute()
@@ -154,6 +204,11 @@ class FridgeFragment : Fragment() {
             override fun onResponse(call: Call<List<FridgeItem>>, response: Response<List<FridgeItem>>) {
                 if (response.isSuccessful) {
                     val fridgeItems = response.body() ?: emptyList()
+
+
+                    previousFridgeItems = fridgeItems.map { it.fridgeIngredient }
+
+
 
                     val foodItems = fridgeItems.map { fridgeItem ->
                         FoodItem(

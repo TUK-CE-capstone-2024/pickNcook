@@ -58,6 +58,12 @@
                         android:src="@drawable/ic_heart_black"
                         android:contentDescription="즐겨찾기" />
 
+                    <Button
+                        android:id="@+id/btnIngredientState"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="내 재료 상태 보기"/>
+
                     <!-- 공간 밀어내기 -->
                     <View
                         android:layout_width="0dp"

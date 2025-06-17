@@ -125,6 +125,12 @@
                             android:text="📋 재료"
                             android:textStyle="bold"
                             android:textSize="@dimen/title1_text_size" />
+                        <Button
+                            android:id="@+id/compareFridgeBtn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="조미료 확인 및 내 냉장고에 없는 재료 찾기"/>
+
 
                         <!-- 재료 내용 -->
                         <TextView

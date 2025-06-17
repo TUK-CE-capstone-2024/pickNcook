@@ -16,6 +16,9 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.net.URLEncoder
+import android.util.Log
+import androidx.appcompat.app.AlertDialog
+import com.example.pickandcook.api.Recipe
 
 class RecipeDetailActivity : AppCompatActivity() {
 
@@ -29,17 +32,36 @@ class RecipeDetailActivity : AppCompatActivity() {
         binding = ActivityRecipeDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        recipeNo = intent.getIntExtra("recipeNo", -1)
+        val userId = getSharedPreferences("UserPrefs", MODE_PRIVATE).getString("userId", null) ?: ""
+
+        checkIfRecipeIsSaved(userId, recipeNo)
+
         binding.toolbar.setNavigationOnClickListener {
             finish()
         }
 
-        recipeNo = intent.getIntExtra("recipeNo", -1)
+        binding.compareFridgeBtn.setOnClickListener {
+            RetrofitClient.instance.getRecipeByNo(recipeNo).enqueue(object : Callback<Recipe> {
+                override fun onResponse(call: Call<Recipe>, response: Response<Recipe>) {
+                    if (response.isSuccessful) {
+                        val ckgMtrlCn = response.body()?.ckgMtrlCn ?: ""
+                        compareWithFridge(ckgMtrlCn)
+                    } else {
+                        Toast.makeText(this@RecipeDetailActivity, "레시피 불러오기 실패", Toast.LENGTH_SHORT).show()
+                    }
+                }
 
-        // DB에서 제목, 이미지 등 정보 가져오기
+                override fun onFailure(call: Call<Recipe>, t: Throwable) {
+                    Toast.makeText(this@RecipeDetailActivity, "서버 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
-            val recipeData = MySQLHelper.getRecipeByNo(recipeNo)  // 아래에 정의해둘 것
+            val recipeData = RetrofitClient.instance.getRecipeByNo(recipeNo).execute().body()
             if (recipeData != null) {
-                recipeTitle = recipeData.rcpTtl
+                recipeTitle = recipeData.rcpTtl ?: ""
                 val imageUrl = recipeData.rcpImgUrl
 
                 withContext(Dispatchers.Main) {
@@ -51,7 +73,6 @@ class RecipeDetailActivity : AppCompatActivity() {
                     }
                 }
 
-                // 이제 정확한 제목으로 크롤링 시작
                 fetchRecipeDetails(recipeTitle)
             } else {
                 withContext(Dispatchers.Main) {
@@ -61,7 +82,11 @@ class RecipeDetailActivity : AppCompatActivity() {
         }
 
         binding.bookmarkBtn.setOnClickListener {
-            saveRecipeToStorage()
+            if (isSaved) {
+                deleteRecipeFromStorage()
+            } else {
+                saveRecipeToStorage()
+            }
         }
     }
 
@@ -84,9 +109,11 @@ class RecipeDetailActivity : AppCompatActivity() {
                     "- ${it.text().replace("구매", "").trim()}"
                 } ?: "재료 정보 없음"
 
-                val steps = doc.select("div.view_step div.media-body").joinToString("\n") {
-                    "• ${it.ownText().trim()}"
-                }
+                // 레시피 순서에 번호 매기기
+                val steps = doc.select("div.view_step div.media-body")
+                    .mapIndexed { index, element ->
+                        "${index + 1} . ${element.ownText().trim()}\n"
+                    }.joinToString("\n")
 
                 withContext(Dispatchers.Main) {
                     binding.recipeName.text = title
@@ -164,4 +191,124 @@ class RecipeDetailActivity : AppCompatActivity() {
                 }
             })
     }
+
+    private fun checkIfRecipeIsSaved(userId: String, recipeNo: Int) {
+        val call = RetrofitClient.instance.isRecipeSaved(userId, recipeNo)
+
+        call.enqueue(object : Callback<Boolean> {
+            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                if (response.isSuccessful && response.body() == true) {
+                    binding.bookmarkBtn.setImageResource(R.drawable.ic_bookmark_filled)
+                    isSaved = true
+                } else {
+                    binding.bookmarkBtn.setImageResource(R.drawable.ic_bookmark_border)
+                    isSaved = false
+                }
+            }
+
+            override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                Toast.makeText(this@RecipeDetailActivity, "서버 통신 실패", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun deleteRecipeFromStorage() {
+        val sharedPref = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        val userId = sharedPref.getString("userId", null)
+
+        if (userId == null) {
+            Toast.makeText(this, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        RetrofitClient.instance.deleteRecipe(userId, recipeNo)
+            .enqueue(object : Callback<Void> {
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                    if (response.isSuccessful) {
+                        Toast.makeText(this@RecipeDetailActivity, "레시피 삭제됨", Toast.LENGTH_SHORT).show()
+                        isSaved = false
+                        binding.bookmarkBtn.setImageResource(R.drawable.ic_bookmark_border)
+                    } else {
+                        Log.d("DELETE", "Try delete: userId=$userId, recipeNo=$recipeNo")
+                        Log.d("DELETE", "code=${response.code()}, success=${response.isSuccessful}")
+
+                        Toast.makeText(this@RecipeDetailActivity, "삭제 실패", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    Toast.makeText(this@RecipeDetailActivity, "오류: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+    }
+
+
+    /*
+    private fun compareWithFridge(ingredientsText: String) {
+        val userId = getSharedPreferences("UserPrefs", MODE_PRIVATE).getString("userId", null) ?: return
+
+        val recipeIngredients = extractIngredients(ingredientsText)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitClient.instance.getFridgeItems(userId).execute()
+                if (response.isSuccessful) {
+                    val fridgeItems = response.body() ?: emptyList()
+                    val fridgeIngredients = fridgeItems.map { it.fridgeIngredient.trim() }
+
+                    val missingIngredients = recipeIngredients.filter { it !in fridgeIngredients }
+
+                    withContext(Dispatchers.Main) {
+                        AlertDialog.Builder(this@RecipeDetailActivity)
+                            .setTitle("없는 재료")
+                            .setMessage(
+                                if (missingIngredients.isEmpty()) "모든 재료를 가지고 있습니다!"
+                                else missingIngredients.joinToString(", ")
+                            )
+                            .setPositiveButton("확인", null)
+                            .show()
+                    }
+                } else {
+                    Log.e("CompareFridge", "냉장고 조회 실패: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("CompareFridge", "에러 발생: ${e.message}")
+            }
+        }
+    }
+     */
+    private fun compareWithFridge(ckgMtrlCn: String) {
+        val userId = getSharedPreferences("UserPrefs", MODE_PRIVATE).getString("userId", null) ?: return
+        val recipeIngredients = ckgMtrlCn.split("|").map { it.trim() }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val response = RetrofitClient.instance.getFridgeItems(userId).execute()
+            if (response.isSuccessful) {
+                val fridgeIngredients = response.body()?.map { it.fridgeIngredient.trim() } ?: emptyList()
+                val missingIngredients = recipeIngredients.filter { it !in fridgeIngredients }
+
+                withContext(Dispatchers.Main) {
+                    AlertDialog.Builder(this@RecipeDetailActivity)
+                        .setTitle("없는 재료")
+                        .setMessage(
+                            if (missingIngredients.isEmpty()) "모든 재료를 가지고 있습니다!"
+                            else missingIngredients.joinToString(", ")
+                        )
+                        .setPositiveButton("확인", null)
+                        .show()
+                }
+            }
+        }
+    }
+
+
+    private fun extractIngredients(rawText: String): List<String> {
+        return rawText.lines()
+            .mapNotNull { line ->
+                Regex("-\\s*(.+?)\\s[\\d/]+[a-zA-Z가-힣]*").find(line)?.groupValues?.get(1)?.trim()
+            }
+    }
+
+
+
 }
