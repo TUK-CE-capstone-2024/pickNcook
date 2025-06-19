@@ -88,11 +88,16 @@ class ShoppingCartFragment : Fragment() {
                                     ShoppingItem(
                                         name = barcodeItem.ingredientName,
                                         barcode = barcodeItem.barcodeNum,
+                                        price = barcodeItem.price, // ✅ 가격 정보 사용
                                         showWarning = cartIngredients.contains(barcodeItem.ingredientName)
                                     )
                                 } ?: emptyList()
 
                                 adapter.updateItems(cartItems)
+
+                                // ✅ 총합 계산
+                                val totalPrice = cartItems.sumOf { it.price }
+                                binding.totalPriceText.text = "총합: ${totalPrice}원"
                             } else {
                                 Toast.makeText(requireContext(), "장바구니 조회 실패", Toast.LENGTH_SHORT).show()
                             }
@@ -112,6 +117,7 @@ class ShoppingCartFragment : Fragment() {
             }
         })
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

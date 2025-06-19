@@ -1,28 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
     android:minHeight="40dp"
     android:padding="@dimen/food_item_padding"
     android:layout_margin="8dp"
-    android:background="@drawable/item_background_selector">
+    android:background="@drawable/item_background_selector"
+    >
 
     <!-- 식재료 이름 -->
     <TextView
         android:id="@+id/itemName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
         android:text="식재료 이름"
         android:textSize="@dimen/food_text_size"
-        android:layout_marginStart="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/warningIcon"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 
+
+    <TextView
+        android:id="@+id/itemPrice"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="0원"
+        android:textSize="@dimen/food_text_size"
+        android:paddingLeft="70dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/warningIcon"
+        app:layout_constraintStart_toEndOf="@+id/itemName"
+        app:layout_constraintTop_toTopOf="parent" />
     <!-- 주의 아이콘 -->
     <ImageView
         android:id="@+id/warningIcon"

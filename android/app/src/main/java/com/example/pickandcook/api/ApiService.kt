@@ -123,6 +123,12 @@ data class RecipeDetailResponse(
     val ckgMthActoNm: String
 )
 
+data class RecipeFilterRequest(
+    val kind: String?,
+    val situation: String?,
+    val method: String?,
+    val ingredients: List<String>?
+)
 
 
 interface ApiService {
@@ -152,6 +158,7 @@ interface ApiService {
         @Query("barcode") barcode: String
     ): Call<Map<String, String>>
 
+    // 이거 안씀. 그냥 재료들 가격 더해서 씀
     @GET("/api/cart/{userId}/totalPrice")
     fun getTotalCartPrice(@Path("userId") userId: String): Call<Map<String, Int>>
 
@@ -213,6 +220,9 @@ interface ApiService {
     @POST("/api/prefer-ingredient/add")
     fun addFavorite(@Body request: FavoriteRequest): Call<Map<String, String>>
 
+
+
+
     @DELETE("/api/prefer-ingredient/delete")
     fun deleteFavorite(
         @Query("userId") userId: String,
@@ -260,13 +270,8 @@ interface ApiService {
     @GET("/api/recipes")
     fun getAllRecipes(): Call<List<Recipe>>
 
-    @GET("/api/recipes/filter")
-    fun filterRecipes(
-        @Query("kind") kind: String,
-        @Query("situation") situation: String,
-        @Query("method") method: String,
-        @Query("ingredients") ingredients: List<String>
-    ): Call<List<Recipe>>
+    @POST("/api/recipes/filter")
+    fun filterRecipes(@Body request: RecipeFilterRequest): Call<List<Recipe>>
 
     @GET("/api/recipes/categories/{column}")
     fun getCategoryValues(@Path("column") column: String): Call<List<String>>
@@ -284,6 +289,9 @@ interface ApiService {
         @Query("ingredientName") ingredientName: String
     ): Call<ResponseBody>
 
+
+    @GET("/main/user/{userId}")
+    fun getUserInfo(@Path("userId") userId: String): Call<User>
 
 
 

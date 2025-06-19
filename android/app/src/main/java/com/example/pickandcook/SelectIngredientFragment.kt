@@ -130,6 +130,7 @@ class SelectIngredientFragment : Fragment() {
                         ShoppingItem(
                             name = barcodeItem.ingredientName,
                             barcode = barcodeItem.barcodeNum,
+                            price = barcodeItem.price,
                             showWarning = fridgeIngredients.contains(barcodeItem.ingredientName)
                         )
                     } ?: emptyList()

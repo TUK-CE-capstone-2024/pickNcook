@@ -17,7 +17,8 @@ class ShoppingAdapter(
 
     inner class ViewHolder(private val binding: ItemShoppingBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: ShoppingItem, isSelected: Boolean) {
-            binding.itemName.text = item.name  // itemName으로 수정
+            binding.itemName.text = item.name
+            binding.itemPrice.text = "${item.price}원"
             binding.warningIcon.visibility = if (item.showWarning) View.VISIBLE else View.INVISIBLE
 
             // 선택 활성화 시 배경 처리
@@ -30,6 +31,7 @@ class ShoppingAdapter(
             }
 
             binding.deleteIcon.visibility = if (enableDelete) View.VISIBLE else View.GONE
+            binding.itemPrice.visibility = if (enableDelete) View.VISIBLE else View.GONE
             binding.deleteIcon.setOnClickListener {
                 onDelete(item)
             }

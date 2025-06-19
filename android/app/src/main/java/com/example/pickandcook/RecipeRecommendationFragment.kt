@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
+import com.example.pickandcook.api.RecipeFilterRequest
 import com.example.pickandcook.api.RecipeItem
 import com.example.pickandcook.api.RetrofitClient
 import kotlinx.coroutines.CoroutineScope
@@ -49,6 +50,51 @@ class RecipeRecommendationFragment : Fragment() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                val request = RecipeFilterRequest(
+                    kind = if (selectedKind.isBlank()) null else selectedKind,
+                    situation = if (selectedSituation.isBlank()) null else selectedSituation,
+                    method = if (selectedMethod.isBlank()) null else selectedMethod,
+                    ingredients = if (selectedIngredients.isEmpty()) null else selectedIngredients
+                )
+
+                val response = RetrofitClient.instance.filterRecipes(request).execute()
+                val recipeList = response.body() ?: emptyList()
+
+                withContext(Dispatchers.Main) {
+                    if (recipeList.isEmpty()) {
+                        Toast.makeText(requireContext(), "조건에 맞는 레시피가 없습니다.", Toast.LENGTH_SHORT).show()
+                        parentFragmentManager.popBackStack()
+                        return@withContext
+                    }
+
+                    val recipeItemList = recipeList.map {
+                        RecipeItem(recipeNo = it.recipeNo, recipeName = it.rcpTtl)
+                    }
+
+                    val fragment = RecipeResultFragment().apply {
+                        arguments = Bundle().apply {
+                            putParcelableArrayList("recipes", ArrayList(recipeItemList))
+                        }
+                    }
+
+                    parentFragmentManager.commit {
+                        hide(this@RecipeRecommendationFragment)
+                        add(R.id.mainFragmentContainer, fragment)
+                        addToBackStack(null)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("RECOMMEND", "API 호출 실패: ${e.message}")
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "서버 오류 발생", Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.popBackStack()
+                }
+            }
+        }
+
+        /*
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
                 val response = RetrofitClient.instance.filterRecipes(
                     selectedKind, selectedSituation, selectedMethod, selectedIngredients
                 ).execute()
@@ -86,6 +132,6 @@ class RecipeRecommendationFragment : Fragment() {
                     parentFragmentManager.popBackStack()
                 }
             }
-        }
+        }*/
     }
 }
