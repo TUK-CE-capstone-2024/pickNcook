@@ -46,14 +46,38 @@ public class RecipeService {
     }
 */
 
-    public List<Recipe> filterRecipes(String kind, String situation, String method) {
-        // 빈 문자열이면 null로 변경 (쿼리에서 IS NULL 체크 가능하도록)
-        kind = kind == null || kind.isEmpty() ? null : kind;
-        situation = situation == null || situation.isEmpty() ? null : situation;
-        method = method == null || method.isEmpty() ? null : method;
+    public List<Recipe> filterRecipes(String kind, String situation, String method, List<String> ingredients) {
+        // null, 빈 문자열 처리
+        kind = (kind == null || kind.isEmpty()) ? null : kind;
+        situation = (situation == null || situation.isEmpty()) ? null : situation;
+        method = (method == null || method.isEmpty()) ? null : method;
 
-        return recipeRepository.filterRecipes(kind, situation, method);
+        List<Recipe> filtered = recipeRepository.filterRecipes(kind, situation, method);
+
+        if (ingredients == null || ingredients.isEmpty()) {
+            return filtered; // 재료 조건 없으면 그대로 반환
+        }
+
+        
+        return filtered.stream()
+        	    .filter(recipe -> {
+        	        String materialStr = recipe.getCkgMtrlCn();
+        	        if (materialStr == null) return false;
+
+        	        List<String> materials = List.of(materialStr.split("\\|")).stream()
+        	            .map(String::trim)
+        	            .toList();
+
+        	        return ingredients.stream()
+        	            .allMatch(ing -> materials.stream()
+        	                .anyMatch(m -> m.trim().equalsIgnoreCase(ing.trim()))
+        	            );
+        	    })
+        	    .toList();
+
     }
+
+
     
     
     // 3. 카테고리 조회

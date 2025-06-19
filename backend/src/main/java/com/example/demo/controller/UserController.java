@@ -65,4 +65,17 @@ public class UserController {
         response.put("userName", user.getUserName());
         return ResponseEntity.ok(response);
     }
+    
+    
+    // userId로 사용자 정보 조회
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<User> getUserInfo(@PathVariable("userId") String userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        return optionalUser
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+
 }

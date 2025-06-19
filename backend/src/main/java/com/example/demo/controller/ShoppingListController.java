@@ -98,7 +98,7 @@ public class ShoppingListController {
             @RequestParam("listNo") int listNo,
             @RequestParam("ingredientName") String ingredientName) {
 
-        detailService.addIngredient(listNo, ingredientName); // ✅ 서비스 호출
+        detailService.addIngredient(listNo, ingredientName); //서비스 호출
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "재료가 추가되었습니다.");

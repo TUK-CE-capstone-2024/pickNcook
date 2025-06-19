@@ -6,12 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.Recipe;
 import com.example.demo.model.RecipeDetailDTO;
+import com.example.demo.model.RecipeFilterRequest;
 import com.example.demo.service.RecipeService;
 
 @RestController
@@ -44,15 +47,19 @@ public class RecipeController {
         return recipeService.getAllRecipes();
     }
 
-    // 2. 필터 조건 레시피
-    @GetMapping("/filter")
-    public List<Recipe> filterRecipes(
-        @RequestParam(name = "kind", required = false) String kind,
-        @RequestParam(name = "situation", required = false) String situation,
-        @RequestParam(name = "method", required = false) String method
-    ) {
-        return recipeService.filterRecipes(kind, situation, method);
+    // 2. 레시피 추천을 위한 필터
+    @PostMapping("/filter")
+    public List<Recipe> filterRecipes(@RequestBody RecipeFilterRequest request) {
+        return recipeService.filterRecipes(
+            request.getKind(),
+            request.getSituation(),
+            request.getMethod(),
+            request.getIngredients()
+        );
     }
+
+
+
 
 
     // 3. 카테고리 값 조회
