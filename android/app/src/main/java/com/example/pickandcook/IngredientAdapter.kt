@@ -1,32 +1,27 @@
 package com.example.pickandcook
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.pickandcook.api.ShoppingListDetail
+import com.example.pickandcook.databinding.ItemIngredientBinding
+
 // 쇼핑리스트때 필요할걸?
 class IngredientAdapter(
     private val ingredients: List<ShoppingListDetail>,
     private val onDeleteClick: (ShoppingListDetail) -> Unit
 ) : RecyclerView.Adapter<IngredientAdapter.ViewHolder>() {
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val ingredientName: TextView = view.findViewById(R.id.tvIngredient)
-        val deleteButton: Button = view.findViewById(R.id.btnDeleteIngredient)
-
+    inner class ViewHolder(private val binding: ItemIngredientBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: ShoppingListDetail) {
-            ingredientName.text = item.ingredientName
-            deleteButton.setOnClickListener { onDeleteClick(item) }
+            binding.tvIngredient.text = item.ingredientName
+            binding.btnClose.setOnClickListener { onDeleteClick(item) }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_ingredient, parent, false)
-        return ViewHolder(view)
+        val binding = ItemIngredientBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
     }
 
     override fun getItemCount(): Int = ingredients.size

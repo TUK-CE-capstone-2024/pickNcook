@@ -1,26 +1,28 @@
 package com.example.pickandcook
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.pickandcook.api.RetrofitClient
 import com.example.pickandcook.api.ShoppingList
+import com.example.pickandcook.databinding.FragmentShoppingListBinding
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class ShoppingListFragment : Fragment() {
 
-    private lateinit var recyclerView: RecyclerView
+    private var _binding: FragmentShoppingListBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var adapter: ShoppingListAdapter
     private var shoppingLists: MutableList<ShoppingList> = mutableListOf()
 
@@ -28,16 +30,18 @@ class ShoppingListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_shopping_list, container, false)
+        _binding = FragmentShoppingListBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recyclerView = view.findViewById(R.id.shoppingListRecyclerView)
-        val btnAddList = view.findViewById<Button>(R.id.btnAddList)
+        binding.toolbar.setNavigationOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
 
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.shoppingListRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         adapter = ShoppingListAdapter(
             shoppingLists,
@@ -81,9 +85,9 @@ class ShoppingListFragment : Fragment() {
 
 
 
-        recyclerView.adapter = adapter
+        binding.shoppingListRecyclerView.adapter = adapter
 
-        btnAddList.setOnClickListener { addNewShoppingList() }
+        binding.btnAddList.setOnClickListener { addNewShoppingList() }
 
         loadShoppingLists()
     }
@@ -96,6 +100,7 @@ class ShoppingListFragment : Fragment() {
 
         RetrofitClient.instance.getShoppingLists(userId)
             .enqueue(object : Callback<List<ShoppingList>> {
+                @SuppressLint("NotifyDataSetChanged")
                 override fun onResponse(
                     call: Call<List<ShoppingList>>,
                     response: Response<List<ShoppingList>>
@@ -108,7 +113,7 @@ class ShoppingListFragment : Fragment() {
                         }
 
                         shoppingLists.clear()
-                        lists?.let { shoppingLists.addAll(it) }
+                        lists?.let { shoppingLists.addAll(it.reversed()) } // 최신순으로 정렬
                         adapter.notifyDataSetChanged()
                     } else {
                         Log.e("ShoppingList", "서버 응답 실패: ${response.code()}")
@@ -148,4 +153,10 @@ class ShoppingListFragment : Fragment() {
                 }
             })
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
 }

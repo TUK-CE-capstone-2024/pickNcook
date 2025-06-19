@@ -3,8 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="12dp"
-    android:background="#EEEEEE"
+    android:paddingStart="25dp"
+    android:paddingEnd="20dp"
+    android:paddingTop="15dp"
+    android:paddingBottom="15dp"
+    android:background="@drawable/bg_rounded"
     android:layout_marginBottom="8dp">
 
     <TextView
@@ -13,15 +16,16 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="재료명"
-        android:textSize="16sp"
+        android:textSize="@dimen/body_text_size"
         android:textColor="#000000" />
 
-    <Button
-        android:id="@+id/btnDeleteIngredient"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="삭제"
-        android:textSize="14sp"
-        android:backgroundTint="@color/main"
-        android:textColor="#000000"/>
+    <ImageButton
+        android:id="@+id/btnClose"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_close"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="삭제"
+        android:scaleType="fitCenter"
+        android:layout_marginStart="8dp" />
 </LinearLayout>

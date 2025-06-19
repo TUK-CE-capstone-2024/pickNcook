@@ -9,17 +9,12 @@ import com.example.pickandcook.api.Notification
 
 class NotificationAdapter(
     private val list: MutableList<Notification>,
-    private val onDelete: (Notification) -> Unit
 ) : RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
 
     inner class ViewHolder(val binding: ItemNotificationBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: Notification) {
             binding.textMessage.text = item.notificationMsg
             binding.textDate.text = item.regDate
-
-            binding.deleteButton.setOnClickListener {
-                onDelete(item)
-            }
         }
     }
 
@@ -41,4 +36,7 @@ class NotificationAdapter(
             notifyItemRemoved(position)
         }
     }
+
+    fun getItem(position: Int): Notification = list[position]
+
 }

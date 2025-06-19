@@ -3,18 +3,22 @@ package com.example.pickandcook
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.pickandcook.api.RetrofitClient
 import com.example.pickandcook.api.ShoppingListDetail
+import com.example.pickandcook.databinding.FragmentShoppingListDetailBinding
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class ShoppingListDetailFragment : Fragment() {
+
+    private var _binding: FragmentShoppingListDetailBinding? = null
+    private val binding get() = _binding!!
 
     private var listNo: Int = -1
     private var listName: String? = null
@@ -35,19 +39,43 @@ class ShoppingListDetailFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_shopping_list_detail, container, false)
+        _binding = FragmentShoppingListDetailBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val titleView = view.findViewById<TextView>(R.id.tvListTitle)
-        val btnEditTitle = view.findViewById<Button>(R.id.btnEditTitle)
-        val recyclerView = view.findViewById<RecyclerView>(R.id.rvIngredients)
-        val etIngredient = view.findViewById<EditText>(R.id.etNewIngredient)
-        val btnAddIngredient = view.findViewById<Button>(R.id.btnAddIngredient)
+        binding.toolbar.setNavigationOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
 
-        titleView.text = "$listName\n($regDate)"
+        binding.tvListTitle.text = "$listName"
+        binding.tvDate.text = "$regDate"
+        binding.etEditTitle.setText(listName)
+
+        // 텍스트 클릭 시 EditText로 전환
+        binding.tvListTitle.setOnClickListener {
+            binding.tvListTitle.visibility = View.GONE
+            binding.etEditTitle.visibility = View.VISIBLE
+            binding.etEditTitle.requestFocus()
+            binding.etEditTitle.setSelection(binding.etEditTitle.text.length)
+        }
+
+        // Enter 누르면 제목 저장
+        binding.etEditTitle.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                val newTitle = binding.etEditTitle.text.toString().trim()
+                if (newTitle.isNotEmpty() && newTitle != listName) {
+                    updateTitle(newTitle)
+                }
+                binding.etEditTitle.visibility = View.GONE
+                binding.tvListTitle.visibility = View.VISIBLE
+                true
+            } else {
+                false
+            }
+        }
 
         // 어댑터 연결 (삭제 기능 포함)
         ingredientAdapter = IngredientAdapter(ingredients) { item ->
@@ -78,35 +106,16 @@ class ShoppingListDetailFragment : Fragment() {
                 .show()
         }
 
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.adapter = ingredientAdapter
+        binding.rvIngredients.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvIngredients.adapter = ingredientAdapter
 
         // 재료 추가
-        btnAddIngredient.setOnClickListener {
-            val ingredient = etIngredient.text.toString().trim()
+        binding.btnAddIngredient.setOnClickListener {
+            val ingredient = binding.etNewIngredient.text.toString().trim()
             if (ingredient.isNotEmpty()) {
                 addIngredient(ingredient)
-                etIngredient.text.clear()
+                binding.etNewIngredient.text.clear()
             }
-        }
-
-        // 제목 수정
-        btnEditTitle.setOnClickListener {
-            val editText = EditText(requireContext()).apply {
-                setText(listName)
-            }
-
-            AlertDialog.Builder(requireContext())
-                .setTitle("제목 수정")
-                .setView(editText)
-                .setPositiveButton("저장") { _, _ ->
-                    val newTitle = editText.text.toString().trim()
-                    if (newTitle.isNotEmpty()) {
-                        updateTitle(newTitle)
-                    }
-                }
-                .setNegativeButton("취소", null)
-                .show()
         }
 
         loadIngredients()
@@ -172,7 +181,12 @@ class ShoppingListDetailFragment : Fragment() {
                     if (response.isSuccessful) {
                         Toast.makeText(requireContext(), "제목이 수정되었습니다.", Toast.LENGTH_SHORT).show()
                         listName = newTitle
-                        view?.findViewById<TextView>(R.id.tvListTitle)?.text = "$listName\n($regDate)"
+
+                        view?.let {
+                            binding.tvListTitle.text = "$listName"
+                            binding.tvDate.text = "$regDate"
+                            binding.etEditTitle.setText(listName)
+                        }
                     }
                 }
 
@@ -192,4 +206,10 @@ class ShoppingListDetailFragment : Fragment() {
                 }
             }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
 }

@@ -12,6 +12,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
 import com.example.pickandcook.api.RecipeItem
 import com.example.pickandcook.databinding.FragmentRecipeResultBinding
 
@@ -36,6 +37,9 @@ class RecipeResultFragment : Fragment() {
         }
 
         val recipeList = arguments?.getParcelableArrayList<RecipeItem>("recipes") ?: arrayListOf()
+
+        binding.recipeContainer.layoutManager = GridLayoutManager(requireContext(), 2)
+        binding.recipeContainer.adapter = RecipeResultAdapter(recipeList)
 
         recipeList.forEach { recipeItem ->
             val tv = TextView(requireContext()).apply {
