@@ -62,7 +62,11 @@
                         android:id="@+id/btnIngredientState"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="내 재료 상태 보기"/>
+                        android:layout_marginStart="30dp"
+                        android:backgroundTint="@color/red"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/button_size"
+                        android:text="📷 재료 상태 확인" />
 
                     <!-- 공간 밀어내기 -->
                     <View

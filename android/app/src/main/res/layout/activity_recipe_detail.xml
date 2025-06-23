@@ -117,20 +117,30 @@
                         app:layout_constraintStart_toEndOf="@id/recipeImageView"
                         app:layout_constraintEnd_toEndOf="parent">
 
-                        <!-- 재료 제목 -->
-                        <TextView
-                            android:id="@+id/ingredientTitle"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="📋 재료"
-                            android:textStyle="bold"
-                            android:textSize="@dimen/title1_text_size" />
-                        <Button
-                            android:id="@+id/compareFridgeBtn"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="조미료 확인 및 내 냉장고에 없는 재료 찾기"/>
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="8dp">
 
+                            <TextView
+                                android:id="@+id/ingredientTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="📋 재료"
+                                android:textStyle="bold"
+                                android:textSize="@dimen/title1_text_size" />
+
+                            <Button
+                                android:id="@+id/compareFridgeBtn"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="40dp"
+                                android:backgroundTint="@color/red"
+                                android:textColor="@color/white"
+                                android:textSize="@dimen/button_size"
+                                android:text="🔍 없는 재료 확인" />
+                        </LinearLayout>
 
                         <!-- 재료 내용 -->
                         <TextView

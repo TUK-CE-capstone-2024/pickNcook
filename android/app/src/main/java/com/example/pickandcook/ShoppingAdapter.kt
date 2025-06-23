@@ -18,7 +18,7 @@ class ShoppingAdapter(
     inner class ViewHolder(private val binding: ItemShoppingBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(item: ShoppingItem, isSelected: Boolean) {
             binding.itemName.text = item.name
-            binding.itemPrice.text = "${item.price}원"
+            binding.itemPrice.text = formatPrice(item.price)
             binding.warningIcon.visibility = if (item.showWarning) View.VISIBLE else View.INVISIBLE
 
             // 선택 활성화 시 배경 처리
@@ -88,4 +88,9 @@ class ShoppingAdapter(
         }
         notifyDataSetChanged()
     }
+
+    private fun formatPrice(price: Int): String {
+        return String.format("%,d원", price)
+    }
+
 }
