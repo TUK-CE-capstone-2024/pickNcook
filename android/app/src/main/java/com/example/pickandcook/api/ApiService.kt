@@ -101,8 +101,15 @@ data class Recipe(
     val recipeNo: Int,
     val rcpTtl: String,
     val ckgMtrlCn: String,
-    val rcpImgUrl: String
-): Parcelable
+    val rcpImgUrl: String,
+    val ckgNm: String,            // 음식 이름
+    val ckgInbunNm: String,       // 인분
+    val ckgDodfNm: String,        // 난이도
+    val ckgTimeNm: String,        // 소요 시간
+    val ckgKndActoNm: String,     // 종류
+    val ckgStaActoNm: String,     // 상황
+    val ckgMthActoNm: String      // 방법
+) : Parcelable
 
 data class PreferIngredient(
     val preferIngredientNo: Int,

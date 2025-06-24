@@ -2,6 +2,7 @@ package com.example.pickandcook
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -47,6 +48,12 @@ class NotificationFragment : Fragment() {
         // 알림창 들어갈 때 마지막 확인 시간 저장
         val prefs = requireContext().getSharedPreferences("NotiPrefs", Context.MODE_PRIVATE)
         prefs.edit().putString("lastSeenTime", getCurrentTimeISOString()).apply()
+
+
+
+
+        val lastSeenTime = prefs.getString("lastSeenTime", null)
+        Log.d("알림디버그", "lastSeenTime: $lastSeenTime")
 
         val userId = requireActivity()
             .getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)

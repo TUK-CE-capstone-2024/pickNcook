@@ -4,17 +4,25 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.pickandcook.api.Recipe
+import com.example.pickandcook.api.RecipeFilterRequest
 import com.example.pickandcook.api.RecipeItem
+import com.example.pickandcook.api.RetrofitClient
 import com.example.pickandcook.databinding.FragmentRecipeResultBinding
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class RecipeResultFragment : Fragment() {
 
@@ -36,39 +44,12 @@ class RecipeResultFragment : Fragment() {
             parentFragmentManager.popBackStack("CategoryFragment", 0)
         }
 
-        val recipeList = arguments?.getParcelableArrayList<RecipeItem>("recipes") ?: arrayListOf()
+        val recipeList = arguments?.getParcelableArrayList<Recipe>("recipes") ?: arrayListOf()
 
         binding.recipeContainer.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.recipeContainer.adapter = RecipeResultAdapter(recipeList)
 
-        recipeList.forEach { recipeItem ->
-            val tv = TextView(requireContext()).apply {
-                text = recipeItem.recipeName
-                setPadding(40, 60, 40, 60)
-                textSize = 18f
-                setTypeface(null, Typeface.BOLD)
-                setTextColor(Color.BLACK)
-                background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_rounded)
 
-                val params = LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                ).apply {
-                    setMargins(12, 20, 12, 20)
-                }
-                layoutParams = params
-                gravity = Gravity.CENTER
-
-                setOnClickListener {
-                    val intent = Intent(requireContext(), RecipeDetailActivity::class.java).apply {
-                        putExtra("recipeNo", recipeItem.recipeNo)
-                        putExtra("recipeName", recipeItem.recipeName)
-                    }
-                    startActivity(intent)
-                }
-            }
-            binding.recipeContainer.addView(tv)
-        }
     }
 
     override fun onDestroyView() {

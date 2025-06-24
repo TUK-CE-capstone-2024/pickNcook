@@ -13,6 +13,7 @@ import com.example.pickandcook.api.Notification
 import com.example.pickandcook.api.RetrofitClient
 import com.example.pickandcook.databinding.FragmentHomeBinding
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 class HomeFragment : Fragment() {
@@ -64,7 +65,7 @@ class HomeFragment : Fragment() {
                 .commit()
         }
 
-        // 알림 최신 여부 체크하고 빨간 점 표시
+        // 알림빨간 최신 여부 체크하고  점 표시
         val prefs = requireContext().getSharedPreferences("NotiPrefs", Context.MODE_PRIVATE)
         val lastSeenTime = prefs.getString("lastSeenTime", null)
 
@@ -82,9 +83,9 @@ class HomeFragment : Fragment() {
                             val newestTime = notifications.maxOfOrNull { it.regDate }
 
                             if (newestTime != null && lastSeenTime != null) {
-                                val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.getDefault())
-                                val newestDate = sdf.parse(newestTime)
-                                val lastSeenDate = sdf.parse(lastSeenTime)
+                                val newestDate = safeParseDate(newestTime)
+                                val lastSeenDate = safeParseDate(lastSeenTime)
+
 
                                 if (newestDate != null && lastSeenDate != null && newestDate.after(lastSeenDate)) {
                                     binding.redDot.visibility = View.VISIBLE
@@ -105,6 +106,29 @@ class HomeFragment : Fragment() {
         }
 
     }
+
+    private fun safeParseDate(dateStr: String): Date? {
+        val cleaned = dateStr.replace("\\s+".toRegex(), " ").trim()
+
+        val possibleFormats = listOf(
+            "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",  // ISO 8601
+            "yyyy-MM-dd HH:mm:ss",           // 일반적인 DB 저장형
+            "yyyy-MM-dd'T'HH:mm:ss",         // ISO에서 milliseconds 없는 경우
+            "yyyy-MM-dd"                     // 날짜만 오는 경우까지 대비
+        )
+
+        for (format in possibleFormats) {
+            try {
+                val sdf = SimpleDateFormat(format, Locale.getDefault())
+                return sdf.parse(cleaned)
+            } catch (e: Exception) {
+                // 무시하고 다음 포맷 시도
+            }
+        }
+
+        return null // 아무 포맷도 맞지 않으면 null 반환
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -56,10 +56,11 @@ class FridgeFragment : Fragment() {
             parentFragmentManager.popBackStack()
         }
 
+        /*
         binding.addButton.setOnClickListener {
             runYoloAndRefresh()
 
-            /*
+
             val sharedPref = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
             val userId = sharedPref.getString("userId", null)
 
@@ -79,31 +80,76 @@ class FridgeFragment : Fragment() {
                     }
                 })
             }
-
-             */
         }
-
-        binding.asd.setOnClickListener{
-            val sharedPref = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+         */
+        binding.addButton.setOnClickListener {
+            val sharedPref =
+                requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
             val userId = sharedPref.getString("userId", null)
 
-            if (userId != null && previousFridgeItems.isNotEmpty()) {
-                val request = RemovedFavoriteCheckRequest(userId, previousFridgeItems)
-                RetrofitClient.instance.checkRemovedFavorites(request).enqueue(object : Callback<Void> {
-                    override fun onResponse(call: Call<Void>, response: Response<Void>) {
-                        if (response.isSuccessful) {
-                            Log.d("FridgeFragment", "Removed favorites checked.")
-                        } else {
-                            Log.e("FridgeFragment", "알림 API 실패")
+            if (userId != null) {
+                // 1. fridge 상태를 fetch해서 previousFridgeItems 설정
+                RetrofitClient.instance.getFridgeItems(userId)
+                    .enqueue(object : Callback<List<FridgeItem>> {
+                        override fun onResponse(
+                            call: Call<List<FridgeItem>>,
+                            response: Response<List<FridgeItem>>
+                        ) {
+                            if (response.isSuccessful) {
+                                previousFridgeItems =
+                                    response.body()?.map { it.fridgeIngredient } ?: emptyList()
+                                Log.d("FridgeFragment", "이전 재료: $previousFridgeItems")
+
+                                // 2. YOLO 실행
+                                runYoloAndRefresh {
+                                    val request = RemovedFavoriteCheckRequest(userId, previousFridgeItems)
+                                    RetrofitClient.instance.checkRemovedFavorites(request)
+                                        .enqueue(object : Callback<Void> {
+                                            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                                                if (response.isSuccessful) {
+                                                    Log.d("FridgeFragment", "알림 생성 성공")
+                                                } else {
+                                                    Log.e("FridgeFragment", "알림 API 실패")
+                                                }
+                                            }
+
+                                            override fun onFailure(call: Call<Void>, t: Throwable) {
+                                                Log.e("FridgeFragment", "알림 API 오류: ${t.message}")
+                                            }
+                                        })
+                                }
+
+
+                                // 3. 알림 비교 API 호출
+                                val request =
+                                    RemovedFavoriteCheckRequest(userId, previousFridgeItems)
+
+                                RetrofitClient.instance.checkRemovedFavorites(request)
+                                    .enqueue(object : Callback<Void> {
+                                        override fun onResponse(
+                                            call: Call<Void>,
+                                            response: Response<Void>
+                                        ) {
+                                            if (response.isSuccessful) {
+                                                Log.d("FridgeFragment", "알림 생성 성공")
+                                            } else {
+                                                Log.e("FridgeFragment", "알림 API 실패")
+                                            }
+                                        }
+
+                                        override fun onFailure(call: Call<Void>, t: Throwable) {
+                                            Log.e("FridgeFragment", "네트워크 오류: ${t.message}")
+                                        }
+                                    })
+
+                            }
                         }
-                    }
 
-                    override fun onFailure(call: Call<Void>, t: Throwable) {
-                        Log.e("FridgeFragment", "알림 API 오류: ${t.message}")
-                    }
-                })
+                        override fun onFailure(call: Call<List<FridgeItem>>, t: Throwable) {
+                            Log.e("FridgeFragment", "기존 냉장고 재료 로딩 실패", t)
+                        }
+                    })
             }
-
         }
 
 
@@ -115,7 +161,7 @@ class FridgeFragment : Fragment() {
             try {
                 val client = OkHttpClient()
                 val request = Request.Builder()
-                    .url("http://192.168.25.132:5000/get-server-ip")
+                    .url("http://192.168.171.243:5000/get-server-ip")
                     .build()
 
                 val response = client.newCall(request).execute()
@@ -242,7 +288,7 @@ class FridgeFragment : Fragment() {
         })
     }
 
-    private fun runYoloAndRefresh() {
+    private fun runYoloAndRefresh(onYoloComplete: () -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             val sharedPref = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
             val userId = sharedPref.getString("userId", null)
@@ -277,6 +323,7 @@ class FridgeFragment : Fragment() {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(requireContext(), "객체 인식 완료!", Toast.LENGTH_SHORT).show()
                         loadFoodList()
+                        onYoloComplete()  // 여기서 콜백 실행
                     }
                 } else {
                     Log.e("FridgeFragment", "YOLO 감지 실패: ${response.code}")
@@ -292,6 +339,7 @@ class FridgeFragment : Fragment() {
             }
         }
     }
+
     private fun getImageResourceForIngredient(name: String): Int {
         return when (name) {
             "마늘" -> R.drawable.ic_garlic

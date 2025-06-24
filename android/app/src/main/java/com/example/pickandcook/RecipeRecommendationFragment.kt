@@ -73,7 +73,7 @@ class RecipeRecommendationFragment : Fragment() {
 
                     val fragment = RecipeResultFragment().apply {
                         arguments = Bundle().apply {
-                            putParcelableArrayList("recipes", ArrayList(recipeItemList))
+                            putParcelableArrayList("recipes", ArrayList(recipeList))
                         }
                     }
 
