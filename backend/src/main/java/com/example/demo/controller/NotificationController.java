@@ -52,7 +52,9 @@ public class NotificationController {
             .stream()
             .map(Fridge::getFridgeIngredient)
             .toList();
-
+        
+        System.out.println("현재 식재료: " + currentFridgeItems);
+        
         List<String> favoriteItems = preferIngredientRepository.findByUserId(userId)
             .stream()
             .map(PreferIngredient::getPreferIngredient)

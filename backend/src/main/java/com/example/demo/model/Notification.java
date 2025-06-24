@@ -9,6 +9,8 @@ import jakarta.persistence.Table;
 
 import java.sql.Timestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 @Entity
 @Table(name = "notification")
@@ -22,8 +24,10 @@ public class Notification {
     @Column(columnDefinition = "TEXT")
     private String notificationMsg;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     @Column(nullable = false, updatable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp regDate;
+
 
     // Getter, Setter
     public Integer getNotificationNo() {
